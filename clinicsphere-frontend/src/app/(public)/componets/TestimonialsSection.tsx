@@ -71,12 +71,10 @@ const TestimonialsSection = () => {
 
   return (
     <section className="py-20 bg-gradient-to-b from-blue-50 to-indigo-50 relative overflow-hidden">
-      {/* Decorative elements */}
       <div className="absolute -top-20 -right-20 w-96 h-96 rounded-full bg-blue-200/20 blur-3xl"></div>
       <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full bg-indigo-200/20 blur-3xl"></div>
       
       <div className="container mx-auto px-4 relative z-10">
-        {/* Section Header */}
         <div className="text-center mb-16">
           <motion.h2 
             className="text-4xl md:text-5xl font-bold text-gray-800 mb-4"
@@ -99,7 +97,6 @@ const TestimonialsSection = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Testimonials Column */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 h-full">
               <div className="flex justify-between items-start mb-8">
@@ -128,7 +125,6 @@ const TestimonialsSection = () => {
                 >
                   <div className="flex-shrink-0">
                     <div className="relative">
-                      {/* Patient image placeholder */}
                       <div className="bg-gradient-to-br from-blue-100 to-indigo-100 w-40 h-40 rounded-full flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
                         <FaUserInjured className="text-6xl text-blue-600" />
                       </div>
@@ -176,10 +172,7 @@ const TestimonialsSection = () => {
               </AnimatePresence>
             </div>
           </div>
-          
-          {/* Stats and CTA Column */}
           <div className="space-y-8">
-            {/* Stats Cards */}
             <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl shadow-xl p-8 text-white">
               <h3 className="text-2xl font-bold mb-6">By the Numbers</h3>
               
@@ -204,8 +197,6 @@ const TestimonialsSection = () => {
                 ))}
               </div>
             </div>
-            
-            {/* Appointment CTA */}
             <motion.div 
               className="bg-white rounded-2xl shadow-xl p-8 text-center border border-blue-100"
               initial={{ opacity: 0, y: 20 }}
@@ -229,8 +220,6 @@ const TestimonialsSection = () => {
             </motion.div>
           </div>
         </div>
-
-        {/* Video Modal */}
         <AnimatePresence>
           {showVideo && (
             <motion.div 

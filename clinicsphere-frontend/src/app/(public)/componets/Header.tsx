@@ -25,11 +25,11 @@ const Navbar = () => {
 
         const handleClickOutside = (event: MouseEvent) => {
             if (
-            dropdownRef.current &&
-            (dropdownRef.current as unknown as DropdownRef).contains(event.target as Node)
+                dropdownRef.current &&
+                (dropdownRef.current as unknown as DropdownRef).contains(event.target as Node)
             ) {
             } else {
-            setIsDropdownOpen(false);
+                setIsDropdownOpen(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -39,14 +39,14 @@ const Navbar = () => {
     const navItems = [
         { name: 'Home', href: '/', icon: <FaUserMd /> },
         { name: 'Services', href: '/services', icon: <FaStethoscope /> },
-        { 
-            name: 'Specialties', 
+        {
+            name: 'Specialties',
             subItems: [
                 { name: 'Cardiology', href: '/cardiology' },
                 { name: 'Pediatrics', href: '/pediatrics' },
                 { name: 'Neurology', href: '/neurology' },
                 { name: 'Orthopedics', href: '/orthopedics' },
-            ] 
+            ]
         },
         { name: 'Doctors', href: '/doctors', icon: <FaUserFriends /> },
         { name: 'About', href: '/about', icon: <FaInfoCircle /> },
@@ -57,8 +57,8 @@ const Navbar = () => {
         closed: {
             y: '-100%',
             opacity: 0,
-            transition: { 
-                duration: 0.7, 
+            transition: {
+                duration: 0.7,
                 ease: [0.22, 1, 0.36, 1],
                 staggerChildren: 0.05,
                 when: "afterChildren"
@@ -67,8 +67,8 @@ const Navbar = () => {
         open: {
             y: 0,
             opacity: 1,
-            transition: { 
-                duration: 0.7, 
+            transition: {
+                duration: 0.7,
                 ease: [0.22, 1, 0.36, 1],
                 staggerChildren: 0.1,
                 delayChildren: 0.2
@@ -77,31 +77,31 @@ const Navbar = () => {
     };
 
     const itemVariants = {
-        closed: { 
-            y: 20, 
+        closed: {
+            y: 20,
             opacity: 0,
             transition: { duration: 0.3 }
         },
-        open: { 
-            y: 0, 
+        open: {
+            y: 0,
             opacity: 1,
-            transition: { 
-                duration: 0.5, 
+            transition: {
+                duration: 0.5,
                 ease: [0.22, 1, 0.36, 1]
             }
         }
     };
 
     const hoverVariants = {
-        hover: { 
+        hover: {
             scale: 1.05,
             y: -3,
             textShadow: "0px 0px 8px rgba(11, 163, 80, 0.6)",
-            transition: { 
-                type: "spring", 
-                stiffness: 300, 
-                damping: 15 
-            } 
+            transition: {
+                type: "spring",
+                stiffness: 300,
+                damping: 15
+            }
         }
     };
 
@@ -109,26 +109,26 @@ const Navbar = () => {
         <header className={`fixed top-0 w-full z-50 transition-all duration-500 ${scrolled ? 'py-6 bg-white/90 backdrop-blur-xl shadow-xl' : 'py-4 bg-transparent'}`}>
             <div className="container mx-auto px-4 flex justify-between items-center">
                 <Link href="/" className="flex items-center space-x-3 group relative">
-                    <motion.div 
+                    <motion.div
                         className="relative flex items-center justify-center"
-                        
+
                         transition={{ type: "spring", stiffness: 300 }}
                     >
                         <FaUserMd className="relative text-[#0ba350] text-5xl drop-shadow-xl group-hover:drop-shadow-2xl transition-all duration-300" />
                     </motion.div>
-                    <motion.span 
+                    <motion.span
                         className="text-4xl font-black bg-gradient-to-r from-[#0ba350] to-[#0e7c3a] bg-clip-text text-transparent tracking-tight drop-shadow"
-                        
+
                     >
                         ClinicSphere
                     </motion.span>
                 </Link>
                 <nav className="hidden lg:flex space-x-1 items-center">
-                    {navItems.map((item:any, index:any) => (
+                    {navItems.map((item: any, index: any) => (
                         <div key={index} className="relative" onMouseEnter={() => setHoveredItem(index)} onMouseLeave={() => setHoveredItem(null)}>
                             {item.href ? (
                                 <Link href={item.href}>
-                                    <motion.div 
+                                    <motion.div
                                         className="relative px-5 py-3 rounded-lg"
                                         variants={hoverVariants}
                                         whileHover="hover"
@@ -139,7 +139,7 @@ const Navbar = () => {
                                             <span>{item.name}</span>
                                         </span>
                                         {hoveredItem === index && (
-                                            <motion.div 
+                                            <motion.div
                                                 className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#0ba350] to-[#0e7c3a] rounded-full"
                                                 initial={{ width: 0 }}
                                                 animate={{ width: "100%" }}
@@ -151,7 +151,7 @@ const Navbar = () => {
                                 </Link>
                             ) : (
                                 <div className="relative">
-                                    <button 
+                                    <button
                                         className="flex items-center gap-2 px-5 py-3 text-gray-700 font-medium rounded-lg"
                                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                                     >
@@ -165,7 +165,7 @@ const Navbar = () => {
                                     </button>
                                     <AnimatePresence>
                                         {isDropdownOpen && (
-                                            <motion.div 
+                                            <motion.div
                                                 ref={dropdownRef}
                                                 className="absolute left-0 mt-1 w-56 bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-100"
                                                 initial={{ opacity: 0, y: -10 }}
@@ -173,9 +173,9 @@ const Navbar = () => {
                                                 exit={{ opacity: 0, y: -10 }}
                                                 transition={{ duration: 0.3, ease: "easeOut" }}
                                             >
-                                                {item.subItems.map((subItem:any, subIndex:number) => (
+                                                {item.subItems.map((subItem: any, subIndex: number) => (
                                                     <Link key={subIndex} href={subItem.href}>
-                                                        <motion.div 
+                                                        <motion.div
                                                             className="px-5 py-3 hover:bg-[#0ba350]/10 flex items-center gap-3 group"
                                                             whileHover={{ x: 5 }}
                                                             transition={{ type: "spring", stiffness: 300 }}
@@ -194,22 +194,22 @@ const Navbar = () => {
                             )}
                         </div>
                     ))}
-                    
+
                     <motion.div
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.97 }}
                         className="ml-4"
                     >
-                        <Link 
-                            href="/appointment" 
+                        <Link
+                            href="/appointment"
                             className="relative bg-gradient-to-r from-[#0ba350] to-[#0e7c3a] text-white px-7 py-3 rounded-full shadow-lg flex items-center space-x-2 font-semibold text-lg overflow-hidden group"
                         >
-                            <motion.span 
+                            <motion.span
                                 className="absolute inset-0 bg-gradient-to-r from-[#0e7c3a] to-[#0ba350] opacity-0 group-hover:opacity-100 transition-all duration-500"
-                                animate={{ 
+                                animate={{
                                     x: ["-100%", "100%"],
                                 }}
-                                transition={{ 
+                                transition={{
                                     duration: 1.5,
                                     repeat: Infinity,
                                     ease: "linear"
@@ -220,7 +220,21 @@ const Navbar = () => {
                                 <span>Book Appointment</span>
                             </span>
                         </Link>
+                        
+
                     </motion.div>
+                    <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.97 }}
+                            className="ml-2"
+                        >
+                            <Link
+                                href="/login"
+                                className="border border-[#0ba350] text-[#0ba350] px-6 py-3 rounded-full font-semibold transition-all hover:bg-[#0ba350] hover:text-white shadow-md"
+                            >
+                                Login
+                            </Link>
+                        </motion.div>
                 </nav>
                 <motion.button
                     className="lg:hidden text-[#0ba350] focus:outline-none p-2 rounded-full hover:bg-[#0ba350]/10 transition"
@@ -241,15 +255,15 @@ const Navbar = () => {
                         className="lg:hidden fixed top-0 left-0 w-full h-screen bg-gradient-to-b from-white to-[#f0fdf4] z-40 flex flex-col items-center pt-24 pb-10 px-4 shadow-2xl overflow-y-auto"
                     >
                         <div className="w-full max-w-md">
-                            {navItems.map((item:any, index:number) => (
-                                <motion.div 
-                                    key={index} 
+                            {navItems.map((item: any, index: number) => (
+                                <motion.div
+                                    key={index}
                                     className="w-full mb-2"
                                     variants={itemVariants}
                                 >
                                     {item.href ? (
                                         <Link href={item.href} onClick={() => setIsOpen(false)}>
-                                            <div 
+                                            <div
                                                 className="w-full py-5 px-6 rounded-xl bg-white/80 backdrop-blur-sm border border-gray-100 shadow-sm flex items-center gap-3 group"
                                             >
                                                 {item.icon && <span className="text-[#0ba350] text-xl">{item.icon}</span>}
@@ -263,9 +277,9 @@ const Navbar = () => {
                                                 <FaChevronDown />
                                             </div>
                                             <div className="pl-6 mt-1">
-                                                {item.subItems.map((subItem:any, subIndex:number) => (
+                                                {item.subItems.map((subItem: any, subIndex: number) => (
                                                     <Link key={subIndex} href={subItem.href} onClick={() => setIsOpen(false)}>
-                                                        <motion.div 
+                                                        <motion.div
                                                             className="py-3 px-4 rounded-lg flex items-center gap-3 group"
                                                             whileHover={{ x: 5 }}
                                                             transition={{ type: "spring", stiffness: 300 }}
@@ -280,22 +294,22 @@ const Navbar = () => {
                                     )}
                                 </motion.div>
                             ))}
-                            
-                            <motion.div 
+
+                            <motion.div
                                 className="mt-6"
                                 variants={itemVariants}
                             >
-                                <Link 
-                                    href="/appointment" 
+                                <Link
+                                    href="/appointment"
                                     onClick={() => setIsOpen(false)}
                                     className="block w-full py-4 bg-gradient-to-r from-[#0ba350] to-[#0e7c3a] text-white rounded-xl shadow-lg text-center font-bold text-lg relative overflow-hidden group"
                                 >
-                                    <motion.span 
+                                    <motion.span
                                         className="absolute inset-0 bg-gradient-to-r from-[#0e7c3a] to-[#0ba350] opacity-0 group-hover:opacity-100 transition-all duration-500"
-                                        animate={{ 
+                                        animate={{
                                             x: ["-100%", "100%"],
                                         }}
-                                        transition={{ 
+                                        transition={{
                                             duration: 1.5,
                                             repeat: Infinity,
                                             ease: "linear"
@@ -306,10 +320,23 @@ const Navbar = () => {
                                         <span>Book Appointment</span>
                                     </span>
                                 </Link>
+                                <motion.div
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.97 }}
+                                    className="ml-2"
+                                >
+                                    <Link
+                                        href="/login"
+                                        className="border border-[#0ba350] text-[#0ba350] px-6 py-3 rounded-full font-semibold transition-all hover:bg-[#0ba350] hover:text-white shadow-md"
+                                    >
+                                        Login
+                                    </Link>
+                                </motion.div>
+
                             </motion.div>
                         </div>
-                        
-                        <motion.div 
+
+                        <motion.div
                             className="mt-auto pt-10 text-center text-gray-500 text-sm"
                             variants={itemVariants}
                         >

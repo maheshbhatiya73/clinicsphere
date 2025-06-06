@@ -13,6 +13,68 @@ export type RegisterPayload = {
   role: string;
 };
 
+// New type for updating users (password is optional)
+export type UpdateUserPayload = {
+  name?: string;
+  email?: string;
+  password?: string;
+  role?: string;
+};
+
+// Type for user data returned by API
+export type User = {
+  _id: string;
+  name: string;
+  email: string;
+  role: string;
+  activityLog?: { action: string; timestamp: string; _id: string }[];
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+};
+
+// Type for paginated response from get all users
+export type UsersResponse = {
+  users: User[];
+  total: number;
+  page: number;
+  limit: number;
+};
+
+export type DoctorPayload = {
+  name: string;
+  email: string;
+  password?: string; // Optional for create, not needed for update
+  specialty: string;
+  licenseNumber: string;
+};
+
+export type UpdateDoctorPayload = {
+  name?: string;
+  email?: string;
+  password?: string;
+  specialty?: string;
+  licenseNumber?: string;
+};
+
+export type Doctor = {
+  _id: string;
+  name: string;
+  email: string;
+  specialty: string;
+  licenseNumber: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+};
+
+export type DoctorsResponse = {
+  doctors: Doctor[];
+  total: number;
+  page: number;
+  limit: number;
+};
+
 export async function login(payload: LoginPayload) {
   try {
     const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
@@ -70,5 +132,229 @@ export async function fetchUserProfile(token: string) {
     return res.json(); // Returns { id, name, email, role }
   } catch (error: any) {
     throw new Error(error.message || 'Network error during profile fetch');
+  }
+}
+
+export async function createAdminUser(payload: RegisterPayload, token: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/users`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to create user');
+    }
+    return res.json(); // Returns { user: User }
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during user creation');
+  }
+}
+
+// Update a user by ID
+export async function updateAdminUser(
+  userId: string,
+  payload: UpdateUserPayload,
+  token: string
+) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/users/${userId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to update user');
+    }
+    return res.json(); // Returns { user: User }
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during user update');
+  }
+}
+
+// Delete a user by ID
+export async function deleteAdminUser(userId: string, token: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/users/${userId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to delete user');
+    }
+    return res.json(); // Returns success message or empty response
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during user deletion');
+  }
+}
+
+// Get all users (with pagination)
+export async function getAllAdminUsers(
+  token: string,
+  page: number = 1,
+  limit: number = 10
+) {
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/api/admin/users?page=${page}&limit=${limit}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to fetch users');
+    }
+    return res.json() as Promise<UsersResponse>; // Returns UsersResponse
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during fetching users');
+  }
+}
+
+// Get a user by ID
+export async function getAdminUserById(userId: string, token: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/users/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to fetch user');
+    }
+    return res.json(); // Returns { user: User }
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during fetching user');
+  }
+}
+
+export async function createAdminDoctor(payload: DoctorPayload, token: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/doctors`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to create doctor');
+    }
+    return res.json(); // Returns { doctor: Doctor }
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during doctor creation');
+  }
+}
+
+// Update a doctor by ID
+export async function updateAdminDoctor(
+  doctorId: string,
+  payload: UpdateDoctorPayload,
+  token: string
+) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/doctors/${doctorId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to update doctor');
+    }
+    return res.json(); // Returns { doctor: Doctor }
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during doctor update');
+  }
+}
+
+// Delete a doctor by ID
+export async function deleteAdminDoctor(doctorId: string, token: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/doctors/${doctorId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to delete doctor');
+    }
+    return res.json(); // Returns success message or empty response
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during doctor deletion');
+  }
+}
+
+// Get all doctors (with pagination)
+export async function getAllAdminDoctors(
+  token: string,
+  page: number = 1,
+  limit: number = 10
+) {
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/api/admin/doctors?page=${page}&limit=${limit}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to fetch doctors');
+    }
+    return res.json() as Promise<DoctorsResponse>; // Returns DoctorsResponse
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during fetching doctors');
+  }
+}
+
+// Get a doctor by ID
+export async function getAdminDoctorById(doctorId: string, token: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/doctors/${doctorId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to fetch doctor');
+    }
+    return res.json(); // Returns { doctor: Doctor }
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during fetching doctor');
   }
 }

@@ -10,6 +10,7 @@ import {
   Req,
   Query,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { RolesGuard } from '../auth/roles.guard';
@@ -18,11 +19,12 @@ import { UserRole } from './user.schema';
 import { JwtAuthGuard } from 'src/auth/wt-auth.guard';
 import { CreateUserDto } from './reate-user.dto';
 import { UpdateUserDto } from './update-user.dto';
+import { Types } from 'mongoose';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @Get()
   @Roles(UserRole.ADMIN)
@@ -37,13 +39,24 @@ export class UsersController {
 
   @Get('patients')
   @Roles(UserRole.DOCTOR)
-  async getPatients(@Req() req:any, @Query('page') page = 1, @Query('limit') limit = 10) {
+  async getPatients(@Req() req: any, @Query('page') page = 1, @Query('limit') limit = 10) {
     return this.usersService.getPatientsForDoctor(req.user.id, page, limit);
   }
 
+  @Get('profile')
+  async getProfile(@Req() req: any) { 
+    console.log("hello from profile");
+    console.log('req.user:', req.user);
+    const userId = req.user.userId;
+    if (!userId) {
+      throw new ForbiddenException('User ID not found in token');
+    }
+    const user = await this.usersService.findById(userId);
+    return user;
+  }
+  
   @Get(':id')
-  async getUserById(@Req() req:any, @Param('id') id: string) {
-    console.log('getUserById', id);
+  async getUserById(@Req() req: any, @Param('id') id: string) {
     const currentUser = req.user;
 
     if (currentUser.role === UserRole.ADMIN) {
@@ -72,24 +85,16 @@ export class UsersController {
   }
 
   @Put(':id')
-  async updateUser(@Req() req:any, @Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  async updateUser(@Req() req: any, @Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.updateUser(req.user, id, updateUserDto);
   }
 
   @Delete(':id')
   @Roles(UserRole.ADMIN)
-  async deleteUser(@Req() req:any, @Param('id') id: string) {
+  async deleteUser(@Req() req: any, @Param('id') id: string) {
     return this.usersService.deleteUser(req.user, id);
   }
 
-  @Get('profile')
-  async getProfile(@Req() req: any) {
-    const userId = req.user.id;
-    console.log('getProfile', userId); // Debug log
-    const user = await this.usersService.findById(userId);
-    if (!user) {
-      throw new ForbiddenException('User not found');
-    }
-    return user;
-  }
+  
+
 }

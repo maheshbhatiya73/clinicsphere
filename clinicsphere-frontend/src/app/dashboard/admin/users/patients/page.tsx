@@ -1,4 +1,3 @@
-// app/admin/users/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -20,32 +19,26 @@ export default function UsersPage() {
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const { token } = useAuth()
-  // Fetch users
+  const { token } = useAuth();
 
-   const fetchUsers = async () => {
-
-    if(!token) {
-        console.error('No token found. Please log in.');
-        return;
+  const fetchUsers = async () => {
+    if (!token) {
+      console.error('No token found. Please log in.');
+      return;
     }
-   
-      try {
-        const response = await getAllAdminUsers(token, page, limit);
-        setUsers(response.users);
-        setTotal(response.total);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      }
-    };
+    try {
+      const response = await getAllAdminUsers(token, page, limit);
+      setUsers(response.users);
+      setTotal(response.total);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
 
   useEffect(() => {
-    alert('Fetching users with token: ' + token);
-
     fetchUsers();
-  }, [page, limit]);
+  }, [page, limit, token]);
 
-  // Filter users based on search
   const filteredUsers = users.filter(
     (user) =>
       user.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -55,14 +48,14 @@ export default function UsersPage() {
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-6  min-h-screen">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">User Management</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-extrabold text-sky-900">User Management</h1>
         <motion.button
-          whileHover={{ scale: 1.05 }}
+          whileHover={{ scale: 1.05, backgroundColor: '#0284c7' }}
           whileTap={{ scale: 0.95 }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+          className="bg-sky-600 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 font-medium text-sm shadow-lg shadow-sky-600/30 transition-colors"
           onClick={() => setIsCreateOpen(true)}
         >
           <FaPlus /> Add User
@@ -70,29 +63,33 @@ export default function UsersPage() {
       </div>
 
       {/* Search Bar */}
-      <div className="mb-6">
-        <div className="relative">
-          <FaSearch className="absolute top-3 left-3 text-gray-400" />
+      <div className="mb-8">
+        <motion.div
+          whileFocus={{ scale: 1.02 }}
+          className="relative"
+        >
+          <FaSearch className="absolute top-3.5 left-4 text-sky-500" />
           <input
             type="text"
             placeholder="Search by name or email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-12 pr-4 py-3 bg-sky-50/50 border border-sky-200 text-sky-900 rounded-xl focus:outline-none focus:ring-4 focus:ring-sky-300/50 transition-all duration-300 placeholder:text-sky-400/70"
           />
-        </div>
+          <div className="absolute inset-0 rounded-xl pointer-events-none shadow-[0_0_15px_rgba(56,189,248,0.2)]" />
+        </motion.div>
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto bg-white rounded-lg shadow">
+      <div className="overflow-x-auto bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-sky-200/30">
         <table className="min-w-full table-auto">
-          <thead className="bg-gray-100">
+          <thead className="bg-sky-100/50">
             <tr>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Name</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Email</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Role</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Created At</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Actions</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-sky-800">Name</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-sky-800">Email</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-sky-800">Role</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-sky-800">Created At</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-sky-800">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -100,22 +97,23 @@ export default function UsersPage() {
               {filteredUsers.map((user) => (
                 <motion.tr
                   key={user._id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="border-b hover:bg-gray-50"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ type: 'spring', stiffness: 100 }}
+                  className="border-b border-sky-200/30 hover:bg-sky-50/50 transition-colors"
                 >
-                  <td className="px-6 py-4 text-gray-800">{user.name}</td>
-                  <td className="px-6 py-4 text-gray-800">{user.email}</td>
-                  <td className="px-6 py-4 text-gray-800">{user.role}</td>
-                  <td className="px-6 py-4 text-gray-800">
+                  <td className="px-6 py-4 text-sky-900 font-medium">{user.name}</td>
+                  <td className="px-6 py-4 text-sky-900">{user.email}</td>
+                  <td className="px-6 py-4 text-sky-900">{user.role}</td>
+                  <td className="px-6 py-4 text-sky-900">
                     {new Date(user.createdAt).toLocaleDateString()}
                   </td>
-                  <td className="px-6 py-4 flex gap-2">
+                  <td className="px-6 py-4 flex gap-3">
                     <motion.button
-                      whileHover={{ scale: 1.1 }}
+                      whileHover={{ scale: 1.1, color: '#0284c7' }}
                       whileTap={{ scale: 0.9 }}
-                      className="text-blue-600 hover:underline"
+                      className="text-sky-600 font-medium hover:underline"
                       onClick={() => {
                         setSelectedUser(user);
                         setIsUpdateOpen(true);
@@ -124,9 +122,9 @@ export default function UsersPage() {
                       Edit
                     </motion.button>
                     <motion.button
-                      whileHover={{ scale: 1.1 }}
+                      whileHover={{ scale: 1.1, color: '#dc2626' }}
                       whileTap={{ scale: 0.9 }}
-                      className="text-red-600 hover:underline"
+                      className="text-red-600 font-medium hover:underline"
                       onClick={() => {
                         setSelectedUser(user);
                         setIsDeleteOpen(true);
@@ -143,26 +141,26 @@ export default function UsersPage() {
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-between items-center mt-6">
-        <p className="text-gray-600">
+      <div className="flex justify-between items-center mt-8">
+        <p className="text-sky-800 font-medium text-sm">
           Showing {filteredUsers.length} of {total} users
         </p>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <motion.button
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.05, backgroundColor: '#e0f2fe' }}
             whileTap={{ scale: 0.95 }}
             disabled={page === 1}
             onClick={() => setPage(page - 1)}
-            className="px-4 py-2 bg-gray-200 rounded-lg disabled:opacity-50"
+            className="px-6 py-2.5 bg-sky-100 text-sky-900 rounded-xl font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Previous
           </motion.button>
           <motion.button
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.05, backgroundColor: '#e0f2fe' }}
             whileTap={{ scale: 0.95 }}
             disabled={page === totalPages}
             onClick={() => setPage(page + 1)}
-            className="px-4 py-2 bg-gray-200 rounded-lg disabled:opacity-50"
+            className="px-6 py-2.5 bg-sky-100 text-sky-900 rounded-xl font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Next
           </motion.button>
@@ -170,15 +168,15 @@ export default function UsersPage() {
       </div>
 
       {/* Modals */}
-      <CreateModal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} />
+      <CreateModal isOpen={isCreateOpen} onClose={() => { setIsCreateOpen(false); fetchUsers(); }} />
       <UpdateModal
         isOpen={isUpdateOpen}
-        onClose={() => setIsUpdateOpen(false)}
+        onClose={() => { setIsUpdateOpen(false); fetchUsers(); }}
         user={selectedUser}
       />
       <DeleteModal
         isOpen={isDeleteOpen}
-        onClose={() => setIsDeleteOpen(false)}
+        onClose={() => { setIsDeleteOpen(false); fetchUsers(); }}
         userId={selectedUser?._id || ''}
       />
     </div>

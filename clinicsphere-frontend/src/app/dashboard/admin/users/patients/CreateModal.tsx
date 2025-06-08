@@ -15,7 +15,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     name: '',
     email: '',
     password: '',
-    role: 'user',
+    role: 'patient',
   });
   const [error, setError] = useState('');
 
@@ -24,7 +24,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     try {
       const token = localStorage.getItem('token') || '';
       await createAdminUser(formData, token);
-      setFormData({ name: '', email: '', password: '', role: 'user' });
+      setFormData({ name: '', email: '', password: '', role: 'patient' });
       onClose();
     } catch (err: any) {
       setError(err.message || 'Failed to create user');
@@ -45,7 +45,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-            className="bg-white/95 backdrop-blur-xl rounded-2xl p-8 w-full max-w-lg shadow-2xl border border-sky-200/30"
+            className="bg-white/95 backdrop-blur-xl rounded-2xl p-8 w-full max-w-2xl shadow-2xl border border-sky-200/30"
           >
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-3xl font-extrabold text-sky-900">Create New User</h2>
@@ -119,26 +119,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                   <div className="absolute inset-0 rounded-xl pointer-events-none shadow-[0_0_15px_rgba(56,189,248,0.2)]" />
                 </motion.div>
               </div>
-              <div>
-                <label className="block text-sky-800 font-medium mb-2 text-sm">Role</label>
-                <motion.div
-                  whileFocus={{ scale: 1.02 }}
-                  className="relative"
-                >
-                  <select
-                    value={formData.role}
-                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                    className="w-full px-4 py-3 bg-sky-50/50 border border-sky-200 text-sky-900 rounded-xl focus:outline-none focus:ring-4 focus:ring-sky-300/50 transition-all duration-300 appearance-none cursor-pointer"
-                  >
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                  <div className="absolute inset-0 rounded-xl pointer-events-none shadow-[0_0_15px_rgba(56,189,248,0.2)]" />
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-sky-500">
-                    ▼
-                  </div>
-                </motion.div>
-              </div>
+           
               <div className="flex justify-end gap-3 pt-2">
                 <motion.button
                   whileHover={{ scale: 1.05, backgroundColor: '#e0f2fe' }}

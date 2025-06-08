@@ -23,6 +23,7 @@ export class UsersService {
   }
 
   async getUserById(id: string): Promise<UserDocument> {
+    console.log(`Fetching user by ID: ${id}`);
     return this.findById(id);
   }
 

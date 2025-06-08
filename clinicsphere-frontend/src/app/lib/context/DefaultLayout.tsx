@@ -16,19 +16,11 @@ interface LayoutContextProps {
 }
 
 interface ProfileTypes {
-  _id: string;
-  fname: string;
-  lname: string;
-  role: string;
+  id: string;
+  name: string;
   email: string;
-  country_code: string;
-  phone_no: string;
-  blocked: string;
-  profile_pic: string;
-  company: {
-    name: string;
-    logo: string;
-  };
+  role: string;
+  profile_pic?: string; // Optional profile picture field
 }
 
 const LayoutContext = createContext<LayoutContextProps | null>(null);
@@ -36,14 +28,11 @@ const LayoutContext = createContext<LayoutContextProps | null>(null);
 export function LayoutProvider({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
- 
-
   const contextValue = {
     isSidebarOpen,
     toggleSidebar: () => setIsSidebarOpen(!isSidebarOpen),
     closeSidebar: () => setIsSidebarOpen(false),
   };
-  
 
   return (
     <LayoutContext.Provider value={contextValue}>
@@ -68,6 +57,7 @@ export default function DefaultLayout({ children }: { children: React.ReactNode 
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
   const router = useRouter();
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !(menuRef.current as any).contains(event.target)) {
@@ -80,29 +70,18 @@ export default function DefaultLayout({ children }: { children: React.ReactNode 
     };
   }, []);
 
-  
   useEffect(() => {
-    // Simulate fetching profile data based on user from AuthContext
     if (user) {
       setProfileData({
-        _id: user.id,
-        fname: user.name.split(' ')[0] || 'John',
-        lname: user.name.split(' ')[1] || 'Doe',
-        role: user.role,
+        id: user.id,
+        name: user.name,
         email: user.email,
-        country_code: '+1',
-        phone_no: '1234567890',
-        blocked: 'false',
-        profile_pic: '/default-profile.png',
-        company: {
-          name: 'HealthCare Inc.',
-          logo: '/healthcare-logo.png',
-        },
+        role: user.role || 'patient',
+        profile_pic: user.profile_pic || '/default-profile.png', // Fallback profile picture
       });
     }
+    
   }, [user]);
-
-
 
   return (
     <div className="min-h-screen transition-colors duration-200">
@@ -168,7 +147,7 @@ export default function DefaultLayout({ children }: { children: React.ReactNode 
                 </div>
                 <div className="text-left hidden sm:block">
                   <p className="font-medium text-[var(--text-primary)]">
-                    {profileData?.fname} {profileData?.lname}
+                    {profileData?.name || 'User'}
                   </p>
                   <p className="text-sm text-[var(--text-secondary)] capitalize">
                     {profileData?.role || 'User'}
@@ -220,7 +199,6 @@ export default function DefaultLayout({ children }: { children: React.ReactNode 
                         <button
                           onClick={() => {
                             setOpen(false);
-                            // Assuming logout is handled by AuthContext
                             router.push('/auth/logout');
                           }}
                           className="flex cursor-pointer items-center w-full px-4 py-2 gap-2 text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -239,7 +217,7 @@ export default function DefaultLayout({ children }: { children: React.ReactNode 
       </header>
 
       <div className="fixed top-0 left-0 z-50">
-        <Sidebar role={profileData?.role || 'patient'} companyname={profileData?.company?.name} companylogo={profileData?.company?.logo} />
+        <Sidebar role={profileData?.role || 'patient'} />
       </div>
 
       <AnimatePresence>

@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaChevronDown } from 'react-icons/fa';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import Image from 'next/image';
 import { useLayout } from '../lib/context/DefaultLayout';
 import { adminNavItems, doctorNavItems, patientNavItems, logoutItem } from '@/app/lib/config/sidebarConfig';
 
@@ -17,11 +16,9 @@ interface NavItem {
 
 interface SidebarProps {
   role: 'admin' | 'doctor' | 'patient';
-  companyname?: string;
-  companylogo?: string;
 }
 
-export default function Sidebar({ role, companyname, companylogo }: SidebarProps) {
+export default function Sidebar({ role }: SidebarProps) {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const { isSidebarOpen, closeSidebar } = useLayout();
   const pathname = usePathname();
@@ -29,14 +26,11 @@ export default function Sidebar({ role, companyname, companylogo }: SidebarProps
   const toggleMenu = (menuName: string) => {
     setOpenMenu(prev => (prev === menuName ? null : menuName));
   };
-
   const isMenuOpen = (menuName: string) => openMenu === menuName;
 
   const navItems: NavItem[] = role === 'admin' ? adminNavItems :
     role === 'doctor' ? doctorNavItems :
     role === 'patient' ? patientNavItems : [];
-
-  const sidebarTitle = role === 'admin' ? (companyname?.toUpperCase() || 'HEALTHCARE') : 'HEALTHCARE';
 
   const sidebarVariants = {
     hidden: { x: '-100%', opacity: 0 },
@@ -46,12 +40,12 @@ export default function Sidebar({ role, companyname, companylogo }: SidebarProps
       transition: { type: 'spring', stiffness: 100, damping: 15 },
     },
   };
-  
+
   const submenuVariants = {
     hidden: { height: 0, opacity: 0, transition: { duration: 0.25, ease: 'easeOut' } },
     visible: { height: 'auto', opacity: 1, transition: { duration: 0.3, ease: 'easeInOut' } },
   };
-  
+
   const itemVariants = {
     hidden: { opacity: 0, y: 10 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.2 } },
@@ -62,7 +56,7 @@ export default function Sidebar({ role, companyname, companylogo }: SidebarProps
       <div className="sticky top-0 z-10 pt-6 pb-4 bg-[var(--bg-secondary)] backdrop-blur-lg">
         <div className="flex items-center space-x-3 px-4">
           <h2 className="text-xl font-extrabold text-transparent bg-gradient-to-r from-indigo-500 to-teal-500 bg-clip-text">
-            {sidebarTitle}
+            HEALTHCARE
           </h2>
         </div>
       </div>
@@ -158,7 +152,6 @@ export default function Sidebar({ role, companyname, companylogo }: SidebarProps
         })}
       </nav>
 
-      {/* Logout */}
       <div className="sticky bottom-0 pt-4 mt-auto border-t border-[var(--border-color)] bg-[var(--bg-secondary)] backdrop-blur-lg">
         <Link
           href={logoutItem.href}
@@ -179,7 +172,6 @@ export default function Sidebar({ role, companyname, companylogo }: SidebarProps
 
   return (
     <>
-      {/* Desktop Sidebar */}
       <motion.aside
         className="hidden lg:block w-72 text-[var(--text-primary)] p-4 fixed h-screen shadow-2xl z-50 border-r bg-[var(--bg-secondary)] backdrop-blur-xl border-[var(--border-color)] overflow-hidden"
         initial={false}
@@ -190,7 +182,6 @@ export default function Sidebar({ role, companyname, companylogo }: SidebarProps
         <SidebarContent />
       </motion.aside>
 
-      {/* Mobile Sidebar */}
       <AnimatePresence>
         {isSidebarOpen && (
           <>

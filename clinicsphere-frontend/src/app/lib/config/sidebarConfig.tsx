@@ -1,7 +1,6 @@
 'use client';
 import { FaTachometerAlt, FaUsers, FaSignOutAlt, FaBuilding, FaMapMarkerAlt } from 'react-icons/fa';
 import { CgProfile } from 'react-icons/cg';
-import { RiExchangeDollarFill } from 'react-icons/ri';
 import { JSX } from 'react';
 
 export interface SubmenuItem {
@@ -28,61 +27,18 @@ export const iconColors = {
 export const adminNavItems: NavItem[] = [
   {
     name: 'Dashboard',
-    href: '/admin',
+    href: '/dashboard/admin',
     icon: <FaTachometerAlt className="w-5 h-5" style={{ color: iconColors.dashboard }} />,
-  },
-  {
-    name: 'Company',
-    href: '/admin/company',
-    icon: <FaBuilding className="w-5 h-5" style={{ color: iconColors.company }} />,
-  },
-  {
-    name: 'Branches',
-    icon: <FaMapMarkerAlt className="w-5 h-5" style={{ color: iconColors.company }} />,
-    submenu: [
-      {
-        name: 'Branches',
-        href: '/admin/branches',
-        icon: <FaMapMarkerAlt className="w-4 h-4" style={{ color: iconColors.company }} />,
-      },
-      {
-        name: 'Doctors',
-        href: '/admin/branches/doctors',
-        icon: <FaUsers className="w-4 h-4" style={{ color: iconColors.users }} />,
-      },
-      {
-        name: 'Patients',
-        href: '/admin/branches/patients',
-        icon: <FaUsers className="w-4 h-4" style={{ color: iconColors.users }} />,
-      },
-    ],
   },
   {
     name: 'Users',
     icon: <FaUsers className="w-5 h-5" style={{ color: iconColors.users }} />,
     submenu: [
-      {
-        name: 'All Users',
-        href: '/admin/users',
-        icon: <FaUsers className="w-4 h-4" style={{ color: iconColors.users }} />,
-      },
-      {
-        name: 'Admins',
-        href: '/admin/admins',
-        icon: <FaUsers className="w-4 h-4" style={{ color: iconColors.users }} />,
-      },
+      { name: 'Doctors', href: '/dashboard/admin/users/doctors', icon: <CgProfile className="w-5 h-5" /> },
+      { name: 'Patients', href: '/dashboard/admin/users/patients', icon: <CgProfile className="w-5 h-5" /> },
     ],
   },
-  {
-    name: 'Plans',
-    href: '/admin/plans',
-    icon: <RiExchangeDollarFill className="w-5 h-5" style={{ color: iconColors.plans }} />,
-  },
-  {
-    name: 'My Profile',
-    href: '/admin/profile',
-    icon: <CgProfile className="w-5 h-5" style={{ color: '#e09326' }} />,
-  },
+ 
 ];
 
 export const doctorNavItems: NavItem[] = [

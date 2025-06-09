@@ -44,9 +44,14 @@ export const adminNavItems: NavItem[] = [
 export const doctorNavItems: NavItem[] = [
   {
     name: 'Dashboard',
-    href: '/doctor',
+    href: '/dashboard/doctor',
     icon: <FaTachometerAlt className="w-5 h-5" style={{ color: iconColors.dashboard }} />,
   },
+  {
+    name: "patients",
+    href: '/dashboard/doctor/patients',
+    icon: <FaUsers className="w-5 h-5" style={{ color: iconColors.users }} />,
+  }
 ];
 
 export const patientNavItems: NavItem[] = [

@@ -161,7 +161,8 @@ export async function fetchUserProfile(token: string) {
       const errorData = await res.json();
       throw new Error(errorData.message || 'Failed to fetch user profile');
     }
-    return res.json(); // Returns { id, name, email, role }
+    const data = await res.json();
+    return data // Returns { id, name, email, role }
   } catch (error: any) {
     throw new Error(error.message || 'Network error during profile fetch');
   }

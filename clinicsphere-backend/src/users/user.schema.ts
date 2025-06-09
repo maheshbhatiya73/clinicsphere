@@ -23,7 +23,8 @@ export class User {
   @Prop({ required: true, enum: UserRole })
   role: UserRole;
 
-  @Prop({ type: Types.ObjectId, ref: 'User' })
+  
+   @Prop({ type: Types.ObjectId, ref: 'User', required: false })
   doctorId?: Types.ObjectId;
 
   @Prop()
@@ -40,8 +41,7 @@ export class User {
 
   @Prop([{ action: String, timestamp: Date }])
   activityLog?: { action: string; timestamp: Date }[];
-
-  // Doctor-specific fields
+  
   @Prop()
   specialization?: string;
 
@@ -62,6 +62,7 @@ export class User {
 
   @Prop()
   phoneNumber?: string;
+
 
   @Prop()
   bio?: string;

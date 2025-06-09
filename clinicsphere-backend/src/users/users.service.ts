@@ -34,7 +34,7 @@ export class UsersService {
   async validateUser(email: string, password: string): Promise<UserDocument | null> {
 
     const user = await this.findByEmail(email);
-    
+
     if (!user || !password || !user.password) {
       return null;
     }
@@ -74,16 +74,20 @@ export class UsersService {
   }
 
   async createUser(data: CreateUserDto) {
+    console.log('createUser payload:', data);
+
     const hashedPassword = await bcrypt.hash(data.password, 12);
     const createdUser = new this.userModel({
-      ...data,
-      password: hashedPassword,
-      activityLog: [{ action: 'User created', timestamp: new Date() }],
+        ...data,
+        doctorId: data.doctorId ? new Types.ObjectId(data.doctorId) : undefined,
+        password: hashedPassword,
+        activityLog: [{ action: 'User created', timestamp: new Date() }],
     });
     const savedUser = await createdUser.save();
-    this.logger.log(`Created user: ${savedUser.email}`);
+    console.log('Saved user:', savedUser);
     return savedUser;
-  }
+}
+
 
   async updateUser(currentUser: UserDocument, userIdToUpdate: string, updateData: UpdateUserDto) {
     const user = await this.findById(userIdToUpdate);
@@ -179,5 +183,12 @@ export class UsersService {
     return { message: 'Password reset successfully' };
   }
 
+
+  async getPatientsByDoctorId(doctorId: string): Promise<User[]> {
+    return this.userModel.find({
+      doctorId: new Types.ObjectId(doctorId), // 👈 Fix
+      role: UserRole.PATIENT,
+    }).exec();
+  }
 
 }

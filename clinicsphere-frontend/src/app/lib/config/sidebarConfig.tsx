@@ -31,6 +31,11 @@ export const adminNavItems: NavItem[] = [
     icon: <FaTachometerAlt className="w-5 h-5" style={{ color: iconColors.dashboard }} />,
   },
   {
+    name: 'Profile',
+    href: '/dashboard/admin/profile',
+    icon: <CgProfile className="w-5 h-5" style={{ color: iconColors.dashboard }} />,
+  },
+  {
     name: 'Users',
     icon: <FaUsers className="w-5 h-5" style={{ color: iconColors.users }} />,
     submenu: [
@@ -47,6 +52,11 @@ export const doctorNavItems: NavItem[] = [
     href: '/dashboard/doctor',
     icon: <FaTachometerAlt className="w-5 h-5" style={{ color: iconColors.dashboard }} />,
   },
+   {
+    name: 'Profile',
+    href: '/dashboard/doctor/profile',
+    icon: <CgProfile className="w-5 h-5" style={{ color: iconColors.dashboard }} />,
+  },
   {
     name: "patients",
     href: '/dashboard/doctor/patients',
@@ -59,6 +69,11 @@ export const patientNavItems: NavItem[] = [
     name: 'Dashboard',
     href: '/patient',
     icon: <FaTachometerAlt className="w-5 h-5" style={{ color: iconColors.dashboard }} />,
+  },
+    {
+    name: 'Profile',
+    href: '/dashboard/patient/profile',
+    icon: <CgProfile className="w-5 h-5" style={{ color: iconColors.dashboard }} />,
   },
 ];
 

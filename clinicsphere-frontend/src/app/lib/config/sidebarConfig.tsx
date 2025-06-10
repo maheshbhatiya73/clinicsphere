@@ -75,6 +75,16 @@ export const patientNavItems: NavItem[] = [
     href: '/dashboard/patient/profile',
     icon: <CgProfile className="w-5 h-5" style={{ color: iconColors.dashboard }} />,
   },
+  {
+    name: 'Appointments',
+    href: '/dashboard/patient/appointments',
+    icon: <FaMapMarkerAlt className="w-5 h-5" style={{ color: iconColors.plans }} />,
+  },
+  {
+    name: 'Doctors',
+    href: '/dashboard/patient/doctors',
+    icon: <FaUsers className="w-5 h-5" style={{ color: iconColors.users }} />,
+  }
 ];
 
 export const logoutItem: NavItem = {

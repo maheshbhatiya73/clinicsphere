@@ -209,9 +209,16 @@ export class UsersService {
 
   async getPatientsByDoctorId(doctorId: string): Promise<User[]> {
     return this.userModel.find({
-      doctorId: new Types.ObjectId(doctorId), // 👈 Fix
+      doctorId: new Types.ObjectId(doctorId),
       role: UserRole.PATIENT,
     }).exec();
+  }
+
+  async getAllDoctors() {
+    return this.userModel.find(
+      { role: 'doctor' },
+      '-password'
+    );
   }
 
 }

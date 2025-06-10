@@ -508,6 +508,21 @@ export async function deleteDoctorPatient(
   } catch (error: any) {
     throw new Error(error.message || 'Network error during patient deletion');
   }
+
+
 }
 
+export async function getAllDoctors() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/doctor/list`);
 
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to fetch doctors');
+    }
+    const data = await res.json();
+    return data // Returns array of Doctor
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during fetching doctors');
+  }
+}

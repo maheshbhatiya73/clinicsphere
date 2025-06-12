@@ -107,6 +107,27 @@ export type DoctorsResponse = {
   limit: number;
 };
 
+export interface Appointment {
+  patientId: any;
+  _id: string;
+  doctorId: { _id: string; name: string; email: string };
+  appointmentDate: string;
+  startTime: string;
+  endTime: string;
+  status: 'scheduled' | 'completed' | 'cancelled';
+  notes?: string;
+  reason?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AppointmentResponse {
+  appointments: Appointment[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export async function login(payload: LoginPayload) {
   try {
     const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
@@ -415,6 +436,7 @@ export async function createDoctorPatient(
     throw new Error(error.message || 'Network error during patient creation');
   }
 }
+
 export async function getAllDoctorPatients(
   token: string,
   page: number = 1,
@@ -465,7 +487,7 @@ export async function getDoctorPatientById(
 
 export async function updateDoctorPatient(
   patientId: string,
-  payload: UpdatePatientPayload,
+  payload: PatientPayload,
   token: string
 ) {
   try {
@@ -524,5 +546,276 @@ export async function getAllDoctors() {
     return data // Returns array of Doctor
   } catch (error: any) {
     throw new Error(error.message || 'Network error during fetching doctors');
+  }
+}
+
+export async function getAllAppointments(page: number = 1, limit: number = 10, role?: string, token?: string) {
+  try {
+    const query = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      ...(role && { role }),
+    }).toString();
+    const res = await fetch(`${API_BASE_URL}/api/admin/appointments?${query}`, {
+      headers: token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to fetch appointments');
+    }
+    const data = await res.json();
+    return data as AppointmentResponse;
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during fetching appointments');
+  }
+}
+
+export async function getAppointmentById(id: string, token?: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/appointments/${id}`, {
+      headers: token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to fetch appointment');
+    }
+    const data = await res.json();
+    return data; // Appointment object
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during fetching appointment');
+  }
+}
+
+export async function createAppointment(appointmentData: {
+  doctorId: string;
+  patientId: string;
+  appointmentDate: string;
+  startTime: string;
+  endTime: string;
+  status?: string;
+  notes?: string;
+  reason?: string;
+}, token?: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/appointments`, {
+      method: 'POST',
+      headers: token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' },
+      body: JSON.stringify(appointmentData),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to create appointment');
+    }
+    const data = await res.json();
+    return data; // Created appointment
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during creating appointment');
+  }
+}
+
+export async function updateAppointment(id: string, appointmentData: {
+  appointmentDate?: string;
+  startTime?: string;
+  endTime?: string;
+  status?: string;
+  notes?: string;
+  reason?: string;
+}, token?: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/appointments/${id}`, {
+      method: 'PUT',
+      headers: token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' },
+      body: JSON.stringify(appointmentData),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to update appointment');
+    }
+    const data = await res.json();
+    return data; // Updated appointment
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during updating appointment');
+  }
+}
+
+export async function deleteAppointment(id: string, token?: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/appointments/${id}`, {
+      method: 'DELETE',
+      headers: token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to delete appointment');
+    }
+    const data = await res.json();
+    return data; // { message: 'Appointment deleted successfully' }
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during deleting appointment');
+  }
+}
+
+export async function getDoctorAppointments(page: number = 1, limit: number = 10, token?: string) {
+  try {
+    const query = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    }).toString();
+    const res = await fetch(`${API_BASE_URL}/api/doctor/appointments?${query}`, {
+      headers: token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to fetch doctor appointments');
+    }
+    const data = await res.json();
+    return data; // { appointments, total, page, limit }
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during fetching doctor appointments');
+  }
+}
+
+export async function getDoctorAppointmentById(id: string, token?: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/doctor/appointments/${id}`, {
+      headers: token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to fetch doctor appointment');
+    }
+    const data = await res.json();
+    return data; // Appointment object
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during fetching doctor appointment');
+  }
+}
+
+export async function createDoctorAppointment(appointmentData: {
+  doctorId: string;
+  patientId: string;
+  appointmentDate: string;
+  startTime: string;
+  endTime: string;
+  status?: string;
+  notes?: string;
+  reason?: string;
+}, token?: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/doctor/appointments`, {
+      method: 'POST',
+      headers: token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' },
+      body: JSON.stringify(appointmentData),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to create doctor appointment');
+    }
+    const data = await res.json();
+    return data; // Created appointment
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during creating doctor appointment');
+  }
+}
+
+export async function updatePatientAppointment(id: string, appointmentData: {
+  appointmentDate?: string;
+  startTime?: string;
+  endTime?: string;
+  status?: string;
+  notes?: string;
+  reason?: string;
+}, token?: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/patient/appointments/${id}`, {
+      method: 'PUT',
+      headers: token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' },
+      body: JSON.stringify(appointmentData),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to update patient appointment');
+    }
+    const data = await res.json();
+    return data; // Updated appointment
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during updating patient appointment');
+  }
+}
+
+export async function deletePatientAppointment(id: string, token?: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/patient/appointments/${id}`, {
+      method: 'DELETE',
+      headers: token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to delete patient appointment');
+    }
+    const data = await res.json();
+    return data; // { message: 'Appointment deleted successfully' }
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during deleting patient appointment');
+  }
+}
+
+
+export async function getPatientAppointments(page: number = 1, limit: number = 10, token?: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/patient/appointments?page=${page}&limit=${limit}`, {
+      headers: token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to fetch patient appointments');
+    }
+    const data = await res.json();
+    return data as AppointmentResponse;
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during fetching patient appointments');
+  }
+}
+
+export async function createPatientAppointment(
+  appointmentData: {
+    doctorId: string;
+    appointmentDate: string;
+    startTime: string;
+    endTime: string;
+    status?: string;
+    notes?: string;
+    reason?: string;
+  },
+  token?: string
+) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/patient/appointments`, {
+      method: 'POST',
+      headers: token
+        ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        : { 'Content-Type': 'application/json' },
+      body: JSON.stringify(appointmentData),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to create patient appointment');
+    }
+    const data = await res.json();
+    return data as Appointment;
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during creating patient appointment');
   }
 }

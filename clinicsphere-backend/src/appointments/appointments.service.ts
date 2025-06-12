@@ -81,33 +81,85 @@ export class AppointmentsService {
     return savedAppointment;
   }
 
-  async getAllAppointments(currentUser: JwtUser, page = 1, limit = 10, role?: UserRole) {
-    let query: any = {};
+  async getAllAppointments(
+    currentUser: JwtUser,
+    page = 1,
+    limit = 10,
+    role?: UserRole,
+  ) {
+    const query: any = {};
+
+    // Normalize userId to ObjectId
+    const userId = new Types.ObjectId(currentUser.userId.toString());
+
+
+
+    console.log("userId", userId);
+    // Role-based filtering
     if (currentUser.role === UserRole.DOCTOR) {
-      query.doctorId = new Types.ObjectId(currentUser.userId);
+      query.doctorId = currentUser.userId.toString();
     } else if (currentUser.role === UserRole.PATIENT) {
-      query.patientId = new Types.ObjectId(currentUser.userId);
+      query.patientId = currentUser.userId.toString();
     }
+    console.log("query", query);
+
+    // Additional filter: by role (admin filtering doctor/patient)
     if (role) {
-      const userQuery = { role };
       const users = await this.usersService.getAllUsers(1, 1000, role);
       const userIds = users.users.map((user: UserDocument) => user._id);
+
       if (currentUser.role === UserRole.DOCTOR) {
         query.patientId = { $in: userIds };
       } else if (currentUser.role === UserRole.ADMIN) {
-        query = role === UserRole.DOCTOR ? { doctorId: { $in: userIds } } : { patientId: { $in: userIds } };
+        query[role === UserRole.DOCTOR ? 'doctorId' : 'patientId'] = {
+          $in: userIds,
+        };
       }
     }
 
-    const skip = (page - 1) * limit;
+    const skip = (Number(page) - 1) * Number(limit);
+
+    // 🔍 Debug log
+    this.logger.log(`🔍 Querying as ${currentUser.role}: ${JSON.stringify(query)}`);
+    this.logger.log(`📄 Pagination: { skip: ${skip}, limit: ${limit} }`);
+
+    // Optional debug: raw check of all DB entries
+    const all = await this.appointmentModel.find().lean();
+    this.logger.log(
+      `🧪 All appointments (raw): ${JSON.stringify(
+        all.map((a) => ({
+          _id: a._id.toString(),
+          doctorId: a.doctorId?.toString(),
+          patientId: a.patientId?.toString(),
+        })),
+        null,
+        2,
+      )}`,
+    );
+
     const [appointments, total] = await Promise.all([
-      this.appointmentModel.find(query).skip(skip).limit(limit).populate('doctorId patientId').exec(),
+      this.appointmentModel
+        .find(query)
+        .skip(skip)
+        .limit(Number(limit))
+        .populate('doctorId patientId')
+        .exec(),
       this.appointmentModel.countDocuments(query).exec(),
     ]);
 
-    this.logger.log(`Fetched ${appointments.length} appointments, page: ${page}, limit: ${limit}`);
-    return { appointments, total, page, limit };
+    this.logger.log(`✅ Found ${appointments.length} appointments out of total ${total}`);
+    this.logger.log(`📋 Appointments: ${JSON.stringify(appointments, null, 2)}`);
+
+    return {
+      appointments,
+      total,
+      page: Number(page),
+      limit: Number(limit),
+    };
   }
+
+
+
 
   async getAppointmentById(currentUser: JwtUser, appointmentId: string) {
     if (!Types.ObjectId.isValid(appointmentId)) {

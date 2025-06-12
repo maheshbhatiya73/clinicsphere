@@ -4,7 +4,8 @@ import { motion } from 'framer-motion';
 import {
   FaUserMd, FaStethoscope, FaCalendarAlt,
   FaClock, FaArrowRight, FaHeart, FaRegHeart,
-  FaLinkedinIn, FaTwitter
+  FaLinkedinIn, FaTwitter,
+  FaMoneyBill
 } from 'react-icons/fa';
 import { getAllDoctors } from '@/app/lib/api/api';
 
@@ -93,11 +94,10 @@ const DoctorsSection = () => {
             <button
               key={specialty.id}
               onClick={() => setActiveFilter(specialty.id)}
-              className={`px-5 py-2.5 rounded-full flex items-center transition-all duration-300 ${
-                activeFilter === specialty.id
+              className={`px-5 py-2.5 rounded-full flex items-center transition-all duration-300 ${activeFilter === specialty.id
                   ? 'bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg'
                   : 'bg-white text-gray-700 border border-gray-200 hover:border-blue-300 hover:shadow-md'
-              }`}
+                }`}
             >
               <FaStethoscope className="mr-2" />
               {specialty.name}
@@ -116,9 +116,8 @@ const DoctorsSection = () => {
             {filteredDoctors.map((doctor) => (
               <motion.div
                 key={doctor._id}
-                className={`bg-white rounded-2xl shadow-xl overflow-hidden border border-white/50 transition-all duration-300 ${
-                  hoveredCard === doctor._id ? 'shadow-2xl scale-[1.02] border-blue-200' : ''
-                }`}
+                className={`bg-white rounded-2xl shadow-xl overflow-hidden border border-white/50 transition-all duration-300 ${hoveredCard === doctor._id ? 'shadow-2xl scale-[1.02] border-blue-200' : ''
+                  }`}
                 whileHover={{ y: -10 }}
                 onHoverStart={() => setHoveredCard(doctor._id)}
                 onHoverEnd={() => setHoveredCard(null)}
@@ -158,10 +157,16 @@ const DoctorsSection = () => {
                       <span className="font-medium">{doctor.experienceYears} years</span>
                     </div>
                     <div className="flex items-center text-sm text-gray-600">
-                      <FaClock className="mr-2" />
+                      <FaMoneyBill className="mr-2" />
                       Fee:
                       <span className="ml-2 font-medium text-blue-600">₹{doctor.appointmentFee}</span>
                     </div>
+                    <div className="flex items-center text-sm text-gray-600 mt-1">
+                      <FaClock className="mr-2" />
+                      Duration:
+                      <span className="ml-2 font-medium text-indigo-600">{doctor.consultationDuration} min</span>
+                    </div>
+
                   </div>
 
                   <div className="flex justify-between">

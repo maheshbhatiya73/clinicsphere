@@ -7,8 +7,15 @@ import * as crypto from 'crypto';
 import { CreateUserDto, } from './reate-user.dto';
 import { UpdateUserDto } from './update-user.dto';
 
+interface JwtUser {
+  userId: string;
+  email: string;
+  role: UserRole;
+}
+
 @Injectable()
 export class UsersService {
+
   private readonly logger = new Logger(UsersService.name);
 
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) { }
@@ -78,18 +85,18 @@ export class UsersService {
 
     const hashedPassword = await bcrypt.hash(data.password, 12);
     const createdUser = new this.userModel({
-        ...data,
-        doctorId: data.doctorId ? new Types.ObjectId(data.doctorId) : undefined,
-        password: hashedPassword,
-        activityLog: [{ action: 'User created', timestamp: new Date() }],
+      ...data,
+      doctorId: data.doctorId ? new Types.ObjectId(data.doctorId) : undefined,
+      password: hashedPassword,
+      activityLog: [{ action: 'User created', timestamp: new Date() }],
     });
     const savedUser = await createdUser.save();
     console.log('Saved user:', savedUser);
     return savedUser;
-}
+  }
 
 
-  async updateUser(currentUser: UserDocument, userIdToUpdate: string, updateData: UpdateUserDto) {
+  async updateUser(currentUser: JwtUser, userIdToUpdate: string, updateData: UpdateUserDto) {
     const user = await this.findById(userIdToUpdate);
     const updateFields = { ...updateData };
 
@@ -107,11 +114,8 @@ export class UsersService {
     }
 
     if (currentUser.role === UserRole.DOCTOR) {
-      if (user.role !== UserRole.PATIENT || user.doctorId?.toString() !== currentUser._id.toString()) {
+      if (user.role !== UserRole.PATIENT || user.doctorId?.toString() !== currentUser.userId) {
         throw new ForbiddenException('Doctors can only update their own patients');
-      }
-      if ('role' in updateFields || 'doctorId' in updateFields) {
-        throw new ForbiddenException('Doctors cannot change role or doctor assignment');
       }
       Object.assign(user, updateFields);
       user.activityLog = user.activityLog || [];
@@ -122,7 +126,7 @@ export class UsersService {
     }
 
     if (currentUser.role === UserRole.PATIENT) {
-      if (user._id.toString() !== currentUser._id.toString()) {
+      if (user._id.toString() !== currentUser.userId.toString()) {
         throw new ForbiddenException('Patients can only update their own profile');
       }
       if ('role' in updateFields || 'doctorId' in updateFields || 'email' in updateFields) {
@@ -139,15 +143,34 @@ export class UsersService {
     throw new ForbiddenException('Unauthorized to update user');
   }
 
-  async deleteUser(currentUser: UserDocument, userIdToDelete: string) {
-    if (currentUser.role !== UserRole.ADMIN) {
-      throw new ForbiddenException('Only admin can delete users');
+  async deleteUser(currentUser: JwtUser, userIdToDelete: string) {
+    const userToDelete = await this.findById(userIdToDelete);
+    if (!userToDelete) {
+      throw new NotFoundException('User not found');
     }
-    const user = await this.findById(userIdToDelete);
-    await this.userModel.deleteOne({ _id: user._id });
-    this.logger.log(`Deleted user: ${userIdToDelete}`);
-    return { message: 'User deleted successfully' };
+
+    if (currentUser.role === UserRole.ADMIN) {
+      // Admin can delete any user
+      await this.userModel.deleteOne({ _id: userToDelete._id });
+      this.logger.log(`Admin deleted user: ${userIdToDelete}`);
+      return { message: 'User deleted successfully' };
+    }
+
+    if (currentUser.role === UserRole.DOCTOR) {
+      // Doctor can delete only their own patients
+      if (userToDelete.role !== UserRole.PATIENT || userToDelete.doctorId?.toString() !== currentUser.userId.toString()) {
+        throw new ForbiddenException('Doctors can only delete their own patients');
+      }
+
+      await this.userModel.deleteOne({ _id: userToDelete._id });
+      this.logger.log(`Doctor deleted patient: ${userIdToDelete}`);
+      return { message: 'Patient deleted successfully' };
+    }
+
+    // Other roles cannot delete users
+    throw new ForbiddenException('Only admins or doctors can delete users');
   }
+
 
   async requestPasswordReset(email: string) {
     const user = await this.findByEmail(email);
@@ -186,9 +209,16 @@ export class UsersService {
 
   async getPatientsByDoctorId(doctorId: string): Promise<User[]> {
     return this.userModel.find({
-      doctorId: new Types.ObjectId(doctorId), // 👈 Fix
+      doctorId: new Types.ObjectId(doctorId),
       role: UserRole.PATIENT,
     }).exec();
+  }
+
+  async getAllDoctors() {
+    return this.userModel.find(
+      { role: 'doctor' },
+      '-password'
+    );
   }
 
 }

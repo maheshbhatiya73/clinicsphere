@@ -57,6 +57,38 @@ export type UpdateDoctorPayload = {
   licenseNumber?: string;
 };
 
+export type PatientPayload = {
+  name: string;
+  email: string;
+  phone: string;
+  age: number;
+  gender: 'male' | 'female' | 'other';
+  medicalHistory?: string;
+};
+
+export type UpdatePatientPayload = Partial<PatientPayload>;
+
+export type Patient = {
+  _id: string;
+  doctorId: string;
+  name: string;
+  email: string;
+  phone: string;
+  age: number;
+  gender: 'male' | 'female' | 'other';
+  medicalHistory?: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+};
+
+export type PatientsResponse = {
+  patients: Patient[];
+  total: number;
+  page: number;
+  limit: number;
+};
+
 export type Doctor = {
   _id: string;
   name: string;
@@ -129,7 +161,8 @@ export async function fetchUserProfile(token: string) {
       const errorData = await res.json();
       throw new Error(errorData.message || 'Failed to fetch user profile');
     }
-    return res.json(); // Returns { id, name, email, role }
+    const data = await res.json();
+    return data // Returns { id, name, email, role }
   } catch (error: any) {
     throw new Error(error.message || 'Network error during profile fetch');
   }
@@ -356,5 +389,140 @@ export async function getAdminDoctorById(doctorId: string, token: string) {
     return res.json(); // Returns { doctor: Doctor }
   } catch (error: any) {
     throw new Error(error.message || 'Network error during fetching doctor');
+  }
+}
+
+export async function createDoctorPatient(
+  payload: PatientPayload,
+  token: string
+) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/doctor/patients`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to create patient');
+    }
+    return res.json(); // Returns { patient: Patient }
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during patient creation');
+  }
+}
+export async function getAllDoctorPatients(
+  token: string,
+  page: number = 1,
+  limit: number = 10
+) {
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/api/doctor/patients?page=${page}&limit=${limit}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to fetch patients');
+    }
+    return res.json() as Promise<PatientsResponse>;
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during fetching patients');
+  }
+}
+
+export async function getDoctorPatientById(
+  doctorId: string,
+  patientId: string,
+  token: string
+) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/doctors/${doctorId}/patients/${patientId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to fetch patient');
+    }
+    return res.json(); // Returns { patient: Patient }
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during fetching patient');
+  }
+}
+
+
+export async function updateDoctorPatient(
+  patientId: string,
+  payload: UpdatePatientPayload,
+  token: string
+) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/doctor/patients/${patientId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to update patient');
+    }
+    return res.json(); // Returns { patient: Patient }
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during patient update');
+  }
+}
+
+export async function deleteDoctorPatient(
+  patientId: string,
+  token: string
+) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/doctor/patients/${patientId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to delete patient');
+    }
+    return res.json(); // Returns success message or empty response
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during patient deletion');
+  }
+
+
+}
+
+export async function getAllDoctors() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/doctor/list`);
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to fetch doctors');
+    }
+    const data = await res.json();
+    return data // Returns array of Doctor
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during fetching doctors');
   }
 }

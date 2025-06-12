@@ -44,7 +44,7 @@ export class DoctorPatientsController {
     @UseGuards(JwtAuthGuard)
     async createPatient(@Req() req: any, @Body() dto: CreateUserDto) {
         const user = req.user;
-        console.log('req.user:', user); 
+        console.log('req.user:', user);
 
         if (!user) {
             throw new UnauthorizedException('User not found in request');
@@ -82,18 +82,24 @@ export class DoctorPatientsController {
         @Param('id') patientId: string,
         @Body() updateUserDto: UpdateUserDto,
     ) {
-        const doctorId = req.user._id;
+        const user = req.user;
         const patient = await this.usersService.findById(patientId);
         if (!patient) throw new NotFoundException('Patient not found');
-        if (patient.doctorId?.toString() !== doctorId.toString()) {
-            throw new ForbiddenException('Access denied to update this patient');
+        
+        if (user.role === UserRole.DOCTOR) {
+            if (patient.doctorId?.toString() !== user.userId.toString()) {
+                throw new ForbiddenException('Access denied to update this patient');
+            }
         }
-        return this.usersService.updateUser(req.user, patientId, updateUserDto);
+        console.log('Updating patient:', patientId, 'by doctor:', user.userId);
+
+        return this.usersService.updateUser(user, patientId, updateUserDto);
     }
+
 
     @Delete(':id')
     async deletePatient(@Req() req: any, @Param('id') patientId: string) {
-        const doctorId = req.user._id;
+        const doctorId = req.user.userId;
         const patient = await this.usersService.findById(patientId);
         if (!patient) throw new NotFoundException('Patient not found');
         if (patient.doctorId?.toString() !== doctorId.toString()) {

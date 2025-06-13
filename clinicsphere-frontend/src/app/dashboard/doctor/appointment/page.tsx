@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaSearch } from 'react-icons/fa';
-import { getPatientAppointments, Appointment, AppointmentResponse } from '@/app/lib/api/api';
+import { getDoctorAppointments, Appointment, AppointmentResponse } from '@/app/lib/api/api';
 import { useAuth } from '@/app/lib/context/AuthContext';
 
-export default function PatientAppointmentsPage() {
+export default function DoctorAppointmentsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -24,7 +24,7 @@ export default function PatientAppointmentsPage() {
     }
     setLoading(true);
     try {
-      const response: AppointmentResponse = await getPatientAppointments(page, limit, token);
+      const response: AppointmentResponse = await getDoctorAppointments(page, limit, token);
       setAppointments(response.appointments);
       setTotal(response.total);
       setError(null);
@@ -42,8 +42,8 @@ export default function PatientAppointmentsPage() {
   // Filter appointments based on search input
   const filteredAppointments = appointments.filter(
     (appointment) =>
-      appointment.doctorId.name.toLowerCase().includes(search.toLowerCase()) ||
-      appointment.doctorId.email.toLowerCase().includes(search.toLowerCase())
+      appointment.patientId.name.toLowerCase().includes(search.toLowerCase()) ||
+      appointment.patientId.email.toLowerCase().includes(search.toLowerCase())
   );
 
   const totalPages = Math.ceil(total / limit);
@@ -64,7 +64,7 @@ export default function PatientAppointmentsPage() {
           <FaSearch className="absolute top-3.5 left-4 text-sky-500" />
           <input
             type="text"
-            placeholder="Search by doctor name or email..."
+            placeholder="Search by patient name or email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-12 pr-4 py-3 bg-sky-50/50 border border-sky-200 text-sky-900 rounded-xl focus:outline-none focus:ring-4 focus:ring-sky-300/50 transition-all duration-300 placeholder:text-sky-400/70"
@@ -91,7 +91,7 @@ export default function PatientAppointmentsPage() {
           <table className="min-w-full table-auto">
             <thead className="bg-sky-100/50">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-sky-800">Doctor</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-sky-800">Patient</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-sky-800">Date</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-sky-800">Time</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-sky-800">Status</th>
@@ -109,7 +109,7 @@ export default function PatientAppointmentsPage() {
                     transition={{ type: 'spring', stiffness: 100 }}
                     className="border-b border-sky-200/30 hover:bg-sky-50/50 transition-colors"
                   >
-                    <td className="px-6 py-4 text-sky-900 font-medium">{appointment.doctorId.name}</td>
+                    <td className="px-6 py-4 text-sky-900 font-medium">{appointment.patientId.name}</td>
                     <td className="px-6 py-4 text-sky-900">
                       {new Date(appointment.appointmentDate).toLocaleDateString()}
                     </td>

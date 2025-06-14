@@ -10,17 +10,22 @@ import {
   ParseIntPipe,
   UseGuards,
   Req,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/create-user.dto';
 import { UpdateUserDto } from '../users/update-user.dto';
 import { UserRole } from '../users/user.schema';
 import { JwtAuthGuard } from 'src/auth/wt-auth.guard';
+import { multerConfig } from 'src/config/multer.config';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('admin/doctors')
 @UseGuards(JwtAuthGuard) // protect routes with JWT auth guard
 export class AdminDoctorController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService, private readonly configService: ConfigService) { }
 
   // GET /admin/doctors?page=1&limit=10
   @Get()
@@ -40,21 +45,41 @@ export class AdminDoctorController {
 
   // POST /admin/doctors
   @Post()
-  async createDoctor(@Body() createUserDto: CreateUserDto) {
-    // Ensure role is doctor for created user (override any incoming role)
+  @UseInterceptors(FileInterceptor('file', multerConfig))
+  async createDoctor(
+    @Body() createUserDto: CreateUserDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    // Force role to "doctor"
     createUserDto.role = UserRole.DOCTOR;
-    return this.usersService.createUser(createUserDto);
+
+    const appUrl = this.configService.get<string>('APP_URL');
+    const profilePicUrl = file
+      ? `${appUrl}/uploads/profile-pics/${file.filename}`
+      : undefined;
+
+    return this.usersService.createUser({
+      ...createUserDto,
+      profilePicUrl,
+    });
   }
 
-  // PUT /admin/doctors/:id
   @Put(':id')
+  @UseInterceptors(FileInterceptor('file', multerConfig))
   async updateDoctor(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
+    @UploadedFile() file: Express.Multer.File,
   ) {
-    // For admin updating doctor, pass dummy currentUser with role ADMIN
-    const currentUser = { role: UserRole.ADMIN } as any;
-    return this.usersService.updateUser(currentUser, id, updateUserDto);
+    const currentUser = { role: UserRole.ADMIN, userId: 'admin' } as any;
+
+    const appUrl = this.configService.get<string>('APP_URL');
+    const profilePicUrl = file ? `${appUrl}/uploads/profile-pics/${file.filename}` : undefined;
+
+    return this.usersService.updateUser(currentUser, id, {
+      ...updateUserDto,
+      ...(profilePicUrl && { profilePicUrl }),
+    });
   }
 
   // DELETE /admin/doctors/:id

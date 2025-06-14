@@ -11,6 +11,8 @@ import {
   Query,
   ForbiddenException,
   BadRequestException,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { RolesGuard } from '../auth/roles.guard';
@@ -20,6 +22,8 @@ import { JwtAuthGuard } from 'src/auth/wt-auth.guard';
 import { CreateUserDto } from './reate-user.dto';
 import { UpdateUserDto } from './update-user.dto';
 import { Types } from 'mongoose';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerConfig } from 'src/config/multer.config';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -44,7 +48,7 @@ export class UsersController {
   }
 
   @Get('profile')
-  async getProfile(@Req() req: any) { 
+  async getProfile(@Req() req: any) {
     console.log("hello from profile");
     console.log('req.user:', req.user);
     const userId = req.user.userId;
@@ -54,7 +58,7 @@ export class UsersController {
     const user = await this.usersService.findById(userId);
     return user;
   }
-  
+
   @Get(':id')
   async getUserById(@Req() req: any, @Param('id') id: string) {
     const currentUser = req.user;
@@ -79,22 +83,43 @@ export class UsersController {
   }
 
   @Post()
-  @Roles(UserRole.ADMIN)
-  async createUser(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.createUser(createUserDto);
+  @UseInterceptors(FileInterceptor('file', multerConfig))
+
+  async createUser(
+    @Body() body: any, // don't use a DTO here for multipart/form-data
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    console.log('createUser raw body:', body); // Debug
+
+    const userData = {
+      name: body.name,
+      email: body.email,
+      password: body.password,
+      role: body.role as UserRole,
+      doctorId: body.doctorId || undefined,
+      profilePicUrl: file ? `/uploads/profile-pics/${file.filename}` : undefined,
+    };
+
+    return this.usersService.createUser(userData);
   }
 
   @Put(':id')
-  async updateUser(@Req() req: any, @Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.updateUser(req.user, id, updateUserDto);
+  @UseInterceptors(FileInterceptor('file', multerConfig))
+  async updateUser(
+    @Req() req: any,
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    const profilePicUrl = file ? `/uploads/profile-pics/${file.filename}` : undefined;
+    return this.usersService.updateUser(req.user, id, {
+      ...updateUserDto,
+      ...(profilePicUrl && { profilePicUrl }),
+    });
   }
-
   @Delete(':id')
   @Roles(UserRole.ADMIN)
   async deleteUser(@Req() req: any, @Param('id') id: string) {
     return this.usersService.deleteUser(req.user, id);
   }
-
-  
-
 }

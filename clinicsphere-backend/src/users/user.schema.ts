@@ -63,6 +63,8 @@ export class User {
   @Prop()
   phoneNumber?: string;
 
+  @Prop()
+  profilePicUrl?: string;
 
   @Prop()
   bio?: string;

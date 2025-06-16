@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaSearch } from 'react-icons/fa';
@@ -16,7 +15,6 @@ export default function AdminAppointmentsPage() {
   const [error, setError] = useState<string | null>(null);
   const { token } = useAuth();
 
-  // Fetch appointments
   const fetchAppointments = async () => {
     if (!token) {
       setError('No token found. Please log in.');
@@ -38,26 +36,22 @@ export default function AdminAppointmentsPage() {
   useEffect(() => {
     fetchAppointments();
   }, [page, limit, token]);
-
-  // Filter appointments based on search input
+  
   const filteredAppointments = appointments.filter(
     (appointment) =>
-      appointment.doctorId.name.toLowerCase().includes(search.toLowerCase()) ||
-      appointment.doctorId.email.toLowerCase().includes(search.toLowerCase()) ||
-      appointment.patientId.name.toLowerCase().includes(search.toLowerCase()) ||
-      appointment.patientId.email.toLowerCase().includes(search.toLowerCase())
+      appointment?.doctorId?.name.toLowerCase().includes(search.toLowerCase()) ||
+      appointment?.doctorId?.email.toLowerCase().includes(search.toLowerCase()) ||
+      appointment?.patientId?.name.toLowerCase().includes(search.toLowerCase()) ||
+      appointment?.patientId?.email.toLowerCase().includes(search.toLowerCase())
   );
 
   const totalPages = Math.ceil(total / limit);
 
   return (
     <div className="container mx-auto p-6 min-h-screen">
-      {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-4xl font-extrabold text-sky-900">Appointment Management</h1>
       </div>
-
-      {/* Search Bar */}
       <div className="mb-8">
         <motion.div
           whileFocus={{ scale: 1.02 }}
@@ -74,20 +68,14 @@ export default function AdminAppointmentsPage() {
           <div className="absolute inset-0 rounded-xl pointer-events-none shadow-[0_0_15px_rgba(56,189,248,0.2)]" />
         </motion.div>
       </div>
-
-      {/* Error Message */}
       {error && (
         <div className="mb-4 p-4 bg-red-100 text-red-800 rounded-xl">
           {error}
         </div>
       )}
-
-      {/* Loading State */}
       {loading && (
         <div className="text-center text-sky-900 font-medium">Loading appointments...</div>
       )}
-
-      {/* Table */}
       {!loading && filteredAppointments.length > 0 && (
         <div className="overflow-x-auto bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-sky-200/30">
           <table className="min-w-full table-auto">
@@ -130,15 +118,11 @@ export default function AdminAppointmentsPage() {
           </table>
         </div>
       )}
-
-      {/* No Appointments Message */}
       {!loading && filteredAppointments.length === 0 && (
         <div className="text-center text-sky-900 font-medium">
           No appointments found.
         </div>
       )}
-
-      {/* Pagination */}
       {!loading && total > 0 && (
         <div className="flex justify-between items-center mt-8">
           <p className="text-sky-800 font-medium text-sm">

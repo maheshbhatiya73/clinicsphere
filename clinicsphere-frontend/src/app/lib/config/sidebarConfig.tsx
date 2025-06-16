@@ -43,7 +43,11 @@ export const adminNavItems: NavItem[] = [
       { name: 'Patients', href: '/dashboard/admin/users/patients', icon: <CgProfile className="w-5 h-5" /> },
     ],
   },
- 
+  {
+    name: "appointments",
+    icon: <FaMapMarkerAlt className="w-5 h-5" style={{ color: iconColors.plans }} />,
+    href: '/dashboard/admin/appointment',
+  }
 ];
 
 export const doctorNavItems: NavItem[] = [
@@ -61,6 +65,11 @@ export const doctorNavItems: NavItem[] = [
     name: "patients",
     href: '/dashboard/doctor/patients',
     icon: <FaUsers className="w-5 h-5" style={{ color: iconColors.users }} />,
+  },
+  {
+    name: "appointments",
+    href: '/dashboard/doctor/appointment',
+    icon: <FaMapMarkerAlt className="w-5 h-5" style={{ color: iconColors.plans }} />,
   }
 ];
 

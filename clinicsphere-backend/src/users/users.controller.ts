@@ -10,7 +10,6 @@ import {
   Req,
   Query,
   ForbiddenException,
-  BadRequestException,
   UseInterceptors,
   UploadedFile,
 } from '@nestjs/common';
@@ -19,7 +18,6 @@ import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { UserRole } from './user.schema';
 import { JwtAuthGuard } from 'src/auth/wt-auth.guard';
-import { CreateUserDto } from './reate-user.dto';
 import { UpdateUserDto } from './update-user.dto';
 import { Types } from 'mongoose';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -86,10 +84,10 @@ export class UsersController {
   @UseInterceptors(FileInterceptor('file', multerConfig))
 
   async createUser(
-    @Body() body: any, // don't use a DTO here for multipart/form-data
+    @Body() body: any, 
     @UploadedFile() file: Express.Multer.File,
   ) {
-    console.log('createUser raw body:', body); // Debug
+    console.log('createUser raw body:', body); 
 
     const userData = {
       name: body.name,

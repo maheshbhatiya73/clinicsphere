@@ -147,14 +147,12 @@ export class UsersService {
     }
 
     if (currentUser.role === UserRole.ADMIN) {
-      // Admin can delete any user
       await this.userModel.deleteOne({ _id: userToDelete._id });
       this.logger.log(`Admin deleted user: ${userIdToDelete}`);
       return { message: 'User deleted successfully' };
     }
 
     if (currentUser.role === UserRole.DOCTOR) {
-      // Doctor can delete only their own patients
       if (userToDelete.role !== UserRole.PATIENT || userToDelete.doctorId?.toString() !== currentUser.userId.toString()) {
         throw new ForbiddenException('Doctors can only delete their own patients');
       }
@@ -163,8 +161,7 @@ export class UsersService {
       this.logger.log(`Doctor deleted patient: ${userIdToDelete}`);
       return { message: 'Patient deleted successfully' };
     }
-
-    // Other roles cannot delete users
+    
     throw new ForbiddenException('Only admins or doctors can delete users');
   }
 
@@ -175,7 +172,7 @@ export class UsersService {
 
     const token = crypto.randomBytes(32).toString('hex');
     user.resetPasswordToken = token;
-    user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour
+    user.resetPasswordExpires = new Date(Date.now() + 3600000); 
     await user.save();
 
     this.logger.log(`Password reset requested for: ${email}`);

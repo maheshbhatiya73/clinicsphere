@@ -1,4 +1,3 @@
-// create-user.dto.ts
 import { IsString, IsEmail, IsEnum, IsOptional, IsNumber, MinLength } from 'class-validator';
 import { UserRole } from './user.schema';
 
@@ -16,8 +15,7 @@ export class UpdateUserDto {
 
   @IsEnum(UserRole)
   role: UserRole;
-
-  // Doctor-specific optional fields
+  
   @IsOptional()
   @IsString()
   specialization?: string;

@@ -35,7 +35,6 @@ export class DoctorPatientsController {
 
     @Get(':id')
     async getPatientById(@Req() req: any, @Param('id') patientId: string) {
-        console.log('Fetching patient by ID:', patientId);
         const doctorId = req.user._id;
         const patient = await this.usersService.findById(patientId);
         if (!patient) throw new NotFoundException('Patient not found');
@@ -53,8 +52,6 @@ export class DoctorPatientsController {
         @Body() dto: CreateUserDto,
         @UploadedFile() file: Express.Multer.File,
     ) {
-        console.log('Request Body:', dto);
-        console.log('Uploaded File:', file);
         const user = req.user;
 
         if (!user) {
@@ -87,7 +84,6 @@ export class DoctorPatientsController {
     @Get()
     async getAllPatients(@Req() req: any) {
         const doctorId = req.user.userId;
-        console.log('Fetching patients for doctor:', doctorId);
         return this.usersService.getPatientsByDoctorId(doctorId);
     }
 
@@ -110,9 +106,7 @@ export class DoctorPatientsController {
                 throw new ForbiddenException('Access denied to update this patient');
             }
         }
-
-        console.log('Updating patient:', patientId, 'by doctor:', user.userId);
-
+        
         const appUrl = this.configService.get<string>('APP_URL');
         const profilePicUrl = file ? `${appUrl}/uploads/profile-pics/${file.filename}` : undefined;
 

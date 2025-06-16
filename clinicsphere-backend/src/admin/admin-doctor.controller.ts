@@ -49,7 +49,6 @@ export class AdminDoctorController {
       ? `${appUrl}/uploads/profile-pics/${file.filename}`
       : undefined;
       
-      console.log(body)
     const doctorData = {
       name: body.name,
       email: body.email,

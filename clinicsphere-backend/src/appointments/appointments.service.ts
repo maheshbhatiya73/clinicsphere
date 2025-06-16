@@ -87,8 +87,7 @@ export class AppointmentsService {
     if (!currentUser?.userId) {
       throw new BadRequestException('Missing userId');
     }
-
-    console.log("getting users from ", currentUser)
+    
     const query: any = {};
 
     const userIdStr = currentUser.userId.toString();

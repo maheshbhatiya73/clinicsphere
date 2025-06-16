@@ -35,7 +35,6 @@ export class UsersController {
     @Query('limit') limit = 10,
     @Query('role') role?: UserRole,
   ) {
-    console.log(role)
     return this.usersService.getAllUsers(page, limit, role);
   }
 
@@ -47,8 +46,6 @@ export class UsersController {
 
   @Get('profile')
   async getProfile(@Req() req: any) {
-    console.log("hello from profile");
-    console.log('req.user:', req.user);
     const userId = req.user.userId;
     if (!userId) {
       throw new ForbiddenException('User ID not found in token');
@@ -87,8 +84,6 @@ export class UsersController {
     @Body() body: any, 
     @UploadedFile() file: Express.Multer.File,
   ) {
-    console.log('createUser raw body:', body); 
-
     const userData = {
       name: body.name,
       email: body.email,

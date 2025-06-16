@@ -30,7 +30,6 @@ export class UsersService {
   }
 
   async getUserById(id: string): Promise<UserDocument> {
-    console.log(`Fetching user by ID: ${id}`);
     return this.findById(id);
   }
 
@@ -45,8 +44,6 @@ export class UsersService {
     if (!user || !password || !user.password) {
       return null;
     }
-    console.log(email, password, user.password);
-
     const isMatch = await bcrypt.compare(password, user.password);
     return isMatch ? user : null;
   }
@@ -81,8 +78,6 @@ export class UsersService {
   }
 
   async createUser(data: CreateUserDto & { profilePicUrl?: string }) {
-    console.log('createUser payload:', data);
-
     const hashedPassword = await bcrypt.hash(data.password, 12);
 
     const createdUser = new this.userModel({
@@ -94,7 +89,6 @@ export class UsersService {
     });
 
     const savedUser = await createdUser.save();
-    console.log('Saved user:', savedUser);
     return savedUser;
   }
 

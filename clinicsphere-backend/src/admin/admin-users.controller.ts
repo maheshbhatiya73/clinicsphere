@@ -17,7 +17,6 @@ import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { UserRole } from '../users/user.schema';
 import { JwtAuthGuard } from 'src/auth/wt-auth.guard';
-import { CreateUserDto } from 'src/users/reate-user.dto';
 import { UpdateUserDto } from 'src/users/update-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from 'src/config/multer.config';

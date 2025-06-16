@@ -7,15 +7,11 @@ import {
   Param,
   Body,
   Query,
-  ParseIntPipe,
   UseGuards,
-  Req,
   UseInterceptors,
   UploadedFile,
-  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
-import { CreateUserDto } from '../users/create-user.dto';
 import { UpdateUserDto } from '../users/update-user.dto';
 import { UserRole } from '../users/user.schema';
 import { JwtAuthGuard } from 'src/auth/wt-auth.guard';
@@ -24,11 +20,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
 
 @Controller('admin/doctors')
-@UseGuards(JwtAuthGuard) // protect routes with JWT auth guard
+@UseGuards(JwtAuthGuard) 
 export class AdminDoctorController {
   constructor(private readonly usersService: UsersService, private readonly configService: ConfigService) { }
-
-  // GET /admin/doctors?page=1&limit=10
   @Get()
   async getAllDoctors(
     @Query('page') page?: string,
@@ -93,7 +87,6 @@ export class AdminDoctorController {
   } 
   @Delete(':id')
   async deleteDoctor(@Param('id') id: string) {
-    // For admin deleting doctor, pass dummy currentUser with role ADMIN
     const currentUser = { role: UserRole.ADMIN } as any;
     return this.usersService.deleteUser(currentUser, id);
   }

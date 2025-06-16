@@ -25,10 +25,7 @@ export class AppointmentsService {
   async createAppointment(currentUser: JwtUser, createAppointmentDto: CreateAppointmentDto) {
     const { doctorId, appointmentDate, startTime, endTime } = createAppointmentDto;
     const patientId = currentUser.userId;
-    console.log("paintId", patientId);
-    console.log("doctorId", doctorId);
 
-    // Validate doctor and patient exist
     const doctor = await this.usersService.findById(doctorId);
     const patient = await this.usersService.findById(patientId);
 
@@ -87,23 +84,21 @@ export class AppointmentsService {
     limit = 10,
     role?: UserRole,
   ) {
+    if (!currentUser?.userId) {
+      throw new BadRequestException('Missing userId');
+    }
+
+    console.log("getting users from ", currentUser)
     const query: any = {};
 
-    // Normalize userId to ObjectId
-    const userId = new Types.ObjectId(currentUser.userId.toString());
+    const userIdStr = currentUser.userId.toString();
 
-
-
-    console.log("userId", userId);
-    // Role-based filtering
     if (currentUser.role === UserRole.DOCTOR) {
-      query.doctorId = currentUser.userId.toString();
+      query.doctorId = userIdStr;
     } else if (currentUser.role === UserRole.PATIENT) {
-      query.patientId = currentUser.userId.toString();
+      query.patientId = userIdStr;
     }
-    console.log("query", query);
 
-    // Additional filter: by role (admin filtering doctor/patient)
     if (role) {
       const users = await this.usersService.getAllUsers(1, 1000, role);
       const userIds = users.users.map((user: UserDocument) => user._id);
@@ -119,24 +114,6 @@ export class AppointmentsService {
 
     const skip = (Number(page) - 1) * Number(limit);
 
-    // 🔍 Debug log
-    this.logger.log(`🔍 Querying as ${currentUser.role}: ${JSON.stringify(query)}`);
-    this.logger.log(`📄 Pagination: { skip: ${skip}, limit: ${limit} }`);
-
-    // Optional debug: raw check of all DB entries
-    const all = await this.appointmentModel.find().lean();
-    this.logger.log(
-      `🧪 All appointments (raw): ${JSON.stringify(
-        all.map((a) => ({
-          _id: a._id.toString(),
-          doctorId: a.doctorId?.toString(),
-          patientId: a.patientId?.toString(),
-        })),
-        null,
-        2,
-      )}`,
-    );
-
     const [appointments, total] = await Promise.all([
       this.appointmentModel
         .find(query)
@@ -147,9 +124,6 @@ export class AppointmentsService {
       this.appointmentModel.countDocuments(query).exec(),
     ]);
 
-    this.logger.log(`✅ Found ${appointments.length} appointments out of total ${total}`);
-    this.logger.log(`📋 Appointments: ${JSON.stringify(appointments, null, 2)}`);
-
     return {
       appointments,
       total,
@@ -157,9 +131,6 @@ export class AppointmentsService {
       limit: Number(limit),
     };
   }
-
-
-
 
   async getAppointmentById(currentUser: JwtUser, appointmentId: string) {
     if (!Types.ObjectId.isValid(appointmentId)) {
@@ -193,7 +164,6 @@ export class AppointmentsService {
       throw new ForbiddenException('Patients can only update their own appointments');
     }
 
-    // Validate time slot if updating
     if (updateAppointmentDto.startTime || updateAppointmentDto.endTime || updateAppointmentDto.appointmentDate) {
       const start = updateAppointmentDto.startTime ? new Date(updateAppointmentDto.startTime) : appointment.startTime;
       const end = updateAppointmentDto.endTime ? new Date(updateAppointmentDto.endTime) : appointment.endTime;

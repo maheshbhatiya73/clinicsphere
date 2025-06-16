@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, Query, UseGuards, Req } from '@nestjs/common';
 import { AppointmentsService } from '../appointments/appointments.service';
 import { CreateAppointmentDto } from '../appointments/create-appointment.dto';
 import { UpdateAppointmentDto } from '../appointments/update-appointment.dto';
@@ -15,11 +15,14 @@ export class AdminAppointmentsController {
 
   @Get()
   async getAllAppointments(
+    @Req() req: any, 
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Query('role') role?: UserRole,
   ) {
-    const currentUser = { role: UserRole.ADMIN } as any; // Dummy user for admin
+    const currentUser = req.user
+
+    console.log("current user ", currentUser)
     return this.appointmentsService.getAllAppointments(currentUser, page, limit, role);
   }
 

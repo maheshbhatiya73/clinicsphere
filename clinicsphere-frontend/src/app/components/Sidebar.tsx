@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, JSX } from 'react';
+import { useState, JSX } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaChevronDown } from 'react-icons/fa';
 import Link from 'next/link';

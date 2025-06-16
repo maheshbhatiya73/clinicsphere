@@ -47,6 +47,11 @@ export const adminNavItems: NavItem[] = [
     name: "appointments",
     icon: <FaMapMarkerAlt className="w-5 h-5" style={{ color: iconColors.plans }} />,
     href: '/dashboard/admin/appointment',
+  },
+  {
+    name: "Specialties",
+    icon: <FaBuilding className="w-5 h-5" style={{ color: iconColors.company }} />,
+    href: '/dashboard/admin/specialties',
   }
 ];
 

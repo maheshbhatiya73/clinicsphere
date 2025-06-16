@@ -11,7 +11,6 @@ export class AuthService {
   constructor(private usersService: UsersService, private jwtService: JwtService) {}
 
   async validateUser(email: string, password: string) {
-    console.log(email, password);
     const user = await this.usersService.validateUser(email, password);
     if (!user) {
       this.logger.warn(`Failed login attempt for email: ${email}`);

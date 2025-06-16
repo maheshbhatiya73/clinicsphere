@@ -16,13 +16,11 @@ export class PatientAppointmentsController {
   
   @Get()
   async getAllAppointments(@Req() req: any, @Query('page') page = 1, @Query('limit') limit = 10) {
-    console.log('Fetching appointments for user:', req.user);
     return this.appointmentsService.getAllAppointments(req.user, page, limit);
   }
 
   @Get(':id')
   async getAppointmentById(@Req() req: any, @Param('id') id: string) {
-    console.log('Fetching appointment by ID:', id, 'for user:', req.user);
     return this.appointmentsService.getAppointmentById(req.user, id);
   }
 
@@ -30,7 +28,6 @@ export class PatientAppointmentsController {
   @UseGuards(JwtAuthGuard)
   async createAppointment(@Req() req: any, @Body() createAppointmentDto: CreateAppointmentDto) {
     const currentUser = req.user;
-    console.log('Creating appointment for user:', currentUser);
     return this.appointmentsService.createAppointment(currentUser, {
       ...createAppointmentDto,
       patientId: currentUser.userId,

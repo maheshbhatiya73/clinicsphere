@@ -21,8 +21,7 @@ export class AdminAppointmentsController {
     @Query('role') role?: UserRole,
   ) {
     const currentUser = req.user
-
-    console.log("current user ", currentUser)
+    
     return this.appointmentsService.getAllAppointments(currentUser, page, limit, role);
   }
 

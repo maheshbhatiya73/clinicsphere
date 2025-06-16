@@ -26,6 +26,7 @@ export type User = {
   _id: string;
   name: string;
   email: string;
+  profilePicUrl: string;
   role: string;
   activityLog?: { action: string; timestamp: string; _id: string }[];
   createdAt: string;
@@ -189,15 +190,14 @@ export async function fetchUserProfile(token: string) {
   }
 }
 
-export async function createAdminUser(payload: RegisterPayload, token: string) {
+export async function createAdminUser(payload: FormData, token: string) {
   try {
     const res = await fetch(`${API_BASE_URL}/api/admin/users`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(payload),
+      body: payload,
     });
 
     if (!res.ok) {
@@ -211,19 +211,14 @@ export async function createAdminUser(payload: RegisterPayload, token: string) {
 }
 
 // Update a user by ID
-export async function updateAdminUser(
-  userId: string,
-  payload: UpdateUserPayload,
-  token: string
-) {
+export async function updateAdminUser(userId: string, payload: FormData, token: string) {
   try {
     const res = await fetch(`${API_BASE_URL}/api/admin/users/${userId}`, {
       method: 'PUT',
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(payload),
+      body: payload,
     });
 
     if (!res.ok) {
@@ -301,15 +296,14 @@ export async function getAdminUserById(userId: string, token: string) {
   }
 }
 
-export async function createAdminDoctor(payload: DoctorPayload, token: string) {
+export async function createAdminDoctor(payload: FormData, token: string) {
   try {
     const res = await fetch(`${API_BASE_URL}/api/admin/doctors`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(payload),
+      body: payload, // Send FormData directly
     });
 
     if (!res.ok) {
@@ -322,20 +316,18 @@ export async function createAdminDoctor(payload: DoctorPayload, token: string) {
   }
 }
 
-// Update a doctor by ID
 export async function updateAdminDoctor(
   doctorId: string,
-  payload: UpdateDoctorPayload,
+  payload: FormData,
   token: string
 ) {
   try {
     const res = await fetch(`${API_BASE_URL}/api/admin/doctors/${doctorId}`, {
       method: 'PUT',
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(payload),
+      body: payload, // Send FormData directly
     });
 
     if (!res.ok) {
@@ -413,18 +405,14 @@ export async function getAdminDoctorById(doctorId: string, token: string) {
   }
 }
 
-export async function createDoctorPatient(
-  payload: PatientPayload,
-  token: string
-) {
+export async function createDoctorPatient(payload: FormData, token: string) {
   try {
     const res = await fetch(`${API_BASE_URL}/api/doctor/patients`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(payload),
+      body: payload,
     });
 
     if (!res.ok) {
@@ -478,7 +466,7 @@ export async function getDoctorPatientById(
       const errorData = await res.json();
       throw new Error(errorData.message || 'Failed to fetch patient');
     }
-    return res.json(); // Returns { patient: Patient }
+    return res.json();
   } catch (error: any) {
     throw new Error(error.message || 'Network error during fetching patient');
   }
@@ -487,24 +475,23 @@ export async function getDoctorPatientById(
 
 export async function updateDoctorPatient(
   patientId: string,
-  payload: PatientPayload,
+  payload: FormData,
   token: string
 ) {
   try {
     const res = await fetch(`${API_BASE_URL}/api/doctor/patients/${patientId}`, {
       method: 'PUT',
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(payload),
+      body: payload,
     });
 
     if (!res.ok) {
       const errorData = await res.json();
       throw new Error(errorData.message || 'Failed to update patient');
     }
-    return res.json(); // Returns { patient: Patient }
+    return res.json(); 
   } catch (error: any) {
     throw new Error(error.message || 'Network error during patient update');
   }

@@ -39,6 +39,9 @@ export class UpdateUserDto {
   consultationDuration?: number;
 
   @IsOptional()
+  profilePicUrl?: string;
+  
+  @IsOptional()
   clinicAddress?: string;
 
   @IsOptional()

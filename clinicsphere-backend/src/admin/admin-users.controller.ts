@@ -66,14 +66,13 @@ export class AdminUsersController {
 
         return this.usersService.createUser(userData);
     }
-
     @Put(':id')
     @UseInterceptors(FileInterceptor('file', multerConfig))
     async update(
         @Req() req: any,
         @Param('id') id: string,
         @UploadedFile() file: Express.Multer.File,
-        @Body() body: any,
+        @Body() body: UpdateUserDto, 
     ) {
         const appUrl = this.configService.get<string>('APP_URL');
         const profilePicUrl = file

@@ -17,7 +17,7 @@ export class CreateUserDto {
 
   @IsEnum(UserRole)
   role: UserRole;
-  
+
   @IsOptional()
   @IsString()
   specialization?: string;
@@ -34,10 +34,10 @@ export class CreateUserDto {
   @IsNumber()
   appointmentFee?: number;
 
-  
-   @IsOptional()
+
+  @IsOptional()
   @IsString()
-  doctorId?: string; 
+  doctorId?: string;
 
   @IsOptional()
   @IsNumber()
@@ -45,6 +45,9 @@ export class CreateUserDto {
 
   @IsOptional()
   clinicAddress?: string;
+
+  @IsOptional()
+  profilePicUrl?: string;
 
   @IsOptional()
   phoneNumber?: string;

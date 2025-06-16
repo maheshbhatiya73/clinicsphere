@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaTimes, FaUser, FaEnvelope, FaLock, FaStethoscope, FaIdCard, FaClock, FaDollarSign, FaMapMarkerAlt, FaInfoCircle } from 'react-icons/fa';
+import { FaTimes, FaUser, FaEnvelope, FaLock, FaStethoscope, FaIdCard, FaClock, FaDollarSign, FaMapMarkerAlt, FaInfoCircle, FaImage } from 'react-icons/fa';
 import { createAdminDoctor, RegisterPayload } from '@/app/lib/api/api';
 
 interface CreateModalProps {
@@ -18,6 +18,7 @@ interface ExtendedRegisterPayload extends RegisterPayload {
   consultationDuration: number;
   clinicAddress: string;
   bio: string;
+  image?: File | null; // Add image field to store the uploaded file
 }
 
 export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
@@ -33,8 +34,11 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     consultationDuration: 0,
     clinicAddress: '',
     bio: '',
+    image: null,
   });
   const [error, setError] = useState('');
+  const [previewImage, setPreviewImage] = useState<string>('https://via.placeholder.com/150?text=Doctor+Profile'); // Default placeholder image
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const specializations = [
     'Cardiology',
@@ -46,11 +50,39 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     'Endocrinology',
   ];
 
+  // Handle image selection and preview
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData((prev) => ({ ...prev, image: file }));
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Trigger file input click when preview is clicked
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token') || '';
-      await createAdminDoctor(formData, token);
+      const formDataToSend = new FormData();
+      // Append all form fields to FormData
+      Object.entries(formData).forEach(([key, value]) => {
+        if (key === 'image' && value instanceof File) {
+          formDataToSend.append("file", value);
+        } else if (value !== null && value !== undefined) {
+          formDataToSend.append(key, value.toString());
+        }
+      });
+
+      await createAdminDoctor(formDataToSend, token);
       setFormData({
         name: '',
         email: '',
@@ -63,7 +95,9 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
         consultationDuration: 0,
         clinicAddress: '',
         bio: '',
+        image: null,
       });
+      setPreviewImage('https://via.placeholder.com/150?text=Doctor+Profile'); // Reset to default image
       onClose();
     } catch (err: any) {
       setError(err.message || 'Failed to create doctor profile');
@@ -74,8 +108,8 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === 'experienceYears' || name === 'appointmentFee' || name === 'consultationDuration' 
-        ? Number(value) 
+      [name]: name === 'experienceYears' || name === 'appointmentFee' || name === 'consultationDuration'
+        ? Number(value)
         : value,
     }));
   };
@@ -94,10 +128,8 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.8, opacity: 0, y: 50 }}
             transition={{ type: 'spring', damping: 25, stiffness: 400 }}
-            className="bg-white/90 backdrop-blur-2xl rounded-3xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border border-indigo-200/20 "
-            style={{
-              scrollbarWidth: "none"
-            }}
+            className="bg-white/90 backdrop-blur-2xl rounded-3xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border border-indigo-200/20"
+            style={{ scrollbarWidth: 'none' }}
           >
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-3xl font-bold text-indigo-900 tracking-tight">Add New Doctor</h2>
@@ -122,6 +154,32 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Image Upload Section */}
+              <div className="flex justify-center mb-6">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="relative cursor-pointer"
+                  onClick={handleImageClick}
+                >
+                  <img
+                    src={previewImage}
+                    alt="Doctor Profile Preview"
+                    className="w-32 h-32 rounded-full object-cover border-4 border-indigo-200 shadow-lg"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-full opacity-0 hover:opacity-100 transition-opacity">
+                    <FaImage className="text-white text-2xl" />
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    ref={fileInputRef}
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </motion.div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Personal Information */}
                 <div className="space-y-4">

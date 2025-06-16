@@ -53,6 +53,8 @@ export class DoctorPatientsController {
         @Body() dto: CreateUserDto,
         @UploadedFile() file: Express.Multer.File,
     ) {
+        console.log('Request Body:', dto);
+        console.log('Uploaded File:', file);
         const user = req.user;
 
         if (!user) {
@@ -102,7 +104,7 @@ export class DoctorPatientsController {
         const user = req.user;
         const patient = await this.usersService.findById(patientId);
         if (!patient) throw new NotFoundException('Patient not found');
-        
+
         if (user.role === UserRole.DOCTOR) {
             if (patient.doctorId?.toString() !== user.userId.toString()) {
                 throw new ForbiddenException('Access denied to update this patient');

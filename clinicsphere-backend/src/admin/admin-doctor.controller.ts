@@ -12,6 +12,7 @@ import {
   Req,
   UseInterceptors,
   UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/create-user.dto';
@@ -37,31 +38,40 @@ export class AdminDoctorController {
     const limitNumber = Number(limit) || 10;
     return this.usersService.getAllUsers(pageNumber, limitNumber, UserRole.DOCTOR);
   }
-  // GET /admin/doctors/:id
+  
   @Get(':id')
   async getDoctorById(@Param('id') id: string) {
     return this.usersService.getUserById(id);
   }
-
-  // POST /admin/doctors
+  
   @Post()
   @UseInterceptors(FileInterceptor('file', multerConfig))
   async createDoctor(
-    @Body() createUserDto: CreateUserDto,
+    @Body() body: any,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    // Force role to "doctor"
-    createUserDto.role = UserRole.DOCTOR;
-
     const appUrl = this.configService.get<string>('APP_URL');
     const profilePicUrl = file
       ? `${appUrl}/uploads/profile-pics/${file.filename}`
       : undefined;
-
-    return this.usersService.createUser({
-      ...createUserDto,
+      
+      console.log(body)
+    const doctorData = {
+      name: body.name,
+      email: body.email,
+      password: body.password,
+      role: UserRole.DOCTOR,
       profilePicUrl,
-    });
+      specialization: body.specialization,
+      licenseNumber: body.licenseNumber,
+      experienceYears: body.experienceYears,
+      appointmentFee: body.appointmentFee,
+      consultationDuration: body.consultationDuration,
+      clinicAddress: body.clinicAddress,
+      bio: body.bio,
+    };
+
+    return this.usersService.createUser(doctorData);
   }
 
   @Put(':id')
@@ -80,9 +90,7 @@ export class AdminDoctorController {
       ...updateUserDto,
       ...(profilePicUrl && { profilePicUrl }),
     });
-  }
-
-  // DELETE /admin/doctors/:id
+  } 
   @Delete(':id')
   async deleteDoctor(@Param('id') id: string) {
     // For admin deleting doctor, pass dummy currentUser with role ADMIN

@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaTimes } from 'react-icons/fa';
-import { createAdminUser, createDoctorPatient, RegisterPayload } from '@/app/lib/api/api';
+import { FaTimes, FaImage } from 'react-icons/fa';
+import { createDoctorPatient, RegisterPayload } from '@/app/lib/api/api';
 
 interface CreateModalProps {
   isOpen: boolean;
@@ -15,19 +15,61 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     name: '',
     email: '',
     password: '',
-    role: 'patient',
+    role: 'patient', // Kept for consistency, though backend overrides
   });
   const [error, setError] = useState('');
+  const [previewImage, setPreviewImage] = useState<string>('/default-profile.png');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        setError('Please select an image file');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image size must be less than 5MB');
+        return;
+      }
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError('');
     try {
       const token = localStorage.getItem('token') || '';
-      await createDoctorPatient(formData, token);
+      const payload = new FormData();
+      payload.append('name', formData.name);
+      payload.append('email', formData.email);
+      payload.append('password', formData.password);
+      // role is optional since backend sets it to PATIENT
+      if (formData.role) payload.append('role', formData.role);
+      if (selectedFile) payload.append('file', selectedFile); // Match backend field name
+
+      await createDoctorPatient(payload, token);
       setFormData({ name: '', email: '', password: '', role: 'patient' });
+      setSelectedFile(null);
+      setPreviewImage('/default-profile.png');
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Failed to create user');
+      setError(err.message || 'Failed to create user. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -68,12 +110,33 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
               </motion.p>
             )}
             <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="flex justify-center mb-6">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="relative cursor-pointer"
+                  onClick={handleImageClick}
+                >
+                  <img
+                    src={previewImage}
+                    alt="User Profile Preview"
+                    className="w-32 h-32 rounded-full object-cover border-4 border-indigo-200 shadow-lg"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-full opacity-0 hover:opacity-100 transition-opacity">
+                    <FaImage className="text-white text-2xl" />
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    ref={fileInputRef}
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </motion.div>
+              </div>
               <div>
                 <label className="block text-sky-800 font-medium mb-2 text-sm">Full Name</label>
-                <motion.div
-                  whileFocus={{ scale: 1.02 }}
-                  className="relative"
-                >
+                <motion.div whileFocus={{ scale: 1.02 }} className="relative">
                   <input
                     type="text"
                     value={formData.name}
@@ -87,10 +150,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
               </div>
               <div>
                 <label className="block text-sky-800 font-medium mb-2 text-sm">Email Address</label>
-                <motion.div
-                  whileFocus={{ scale: 1.02 }}
-                  className="relative"
-                >
+                <motion.div whileFocus={{ scale: 1.02 }} className="relative">
                   <input
                     type="email"
                     value={formData.email}
@@ -104,10 +164,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
               </div>
               <div>
                 <label className="block text-sky-800 font-medium mb-2 text-sm">Password</label>
-                <motion.div
-                  whileFocus={{ scale: 1.02 }}
-                  className="relative"
-                >
+                <motion.div whileFocus={{ scale: 1.02 }} className="relative">
                   <input
                     type="password"
                     value={formData.password}
@@ -119,7 +176,6 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                   <div className="absolute inset-0 rounded-xl pointer-events-none shadow-[0_0_15px_rgba(56,189,248,0.2)]" />
                 </motion.div>
               </div>
-           
               <div className="flex justify-end gap-3 pt-2">
                 <motion.button
                   whileHover={{ scale: 1.05, backgroundColor: '#e0f2fe' }}
@@ -134,9 +190,10 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                   whileHover={{ scale: 1.05, backgroundColor: '#0284c7' }}
                   whileTap={{ scale: 0.95 }}
                   type="submit"
-                  className="px-6 py-2.5 bg-sky-600 text-white rounded-xl font-medium text-sm shadow-lg shadow-sky-600/30 transition-colors"
+                  disabled={isLoading}
+                  className={`px-6 py-2.5 bg-sky-600 text-white rounded-xl font-medium text-sm shadow-lg shadow-sky-600/30 transition-colors ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  Create User
+                  {isLoading ? 'Creating...' : 'Create User'}
                 </motion.button>
               </div>
             </form>

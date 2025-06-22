@@ -14,6 +14,7 @@ import { SpecialtiesModule } from './specialty/specialties.module';
 import { AdminServiceModule } from './admin/admin-service.module';
 import { DoctorAssignmentModule } from './admin/doctor-assignment.module';
 import { ServiceCategoryModule } from './admin/service-category.module';
+import { DoctorClinicModule } from './doctor/doctor-clinic.module';
 
 @Module({
   imports: [
@@ -36,7 +37,8 @@ import { ServiceCategoryModule } from './admin/service-category.module';
     SpecialtiesModule,
     DoctorAssignmentModule,
     AdminServiceModule,
-    ServiceCategoryModule
+    ServiceCategoryModule,
+    DoctorClinicModule
   ],
   controllers: [AppController],
   providers: [AppService],

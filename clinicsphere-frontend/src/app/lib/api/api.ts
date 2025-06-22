@@ -914,3 +914,84 @@ export async function deleteAdminSpecialty(specialtyId: string, token: string) {
     throw new Error(error.message || 'Network error during specialty deletion');
   }
 }
+
+export async function getAllAdminClinics(token: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/admin-clinic`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) throw await res.json();
+    return res.json();
+  } catch (error: any) {
+    throw new Error(error.message || 'Failed to fetch clinics');
+  }
+}
+
+export async function getAdminClinicById(clinicId: string, token: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/admin-clinic/${clinicId}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) throw await res.json();
+    return res.json();
+  } catch (error: any) {
+    throw new Error(error.message || 'Failed to fetch clinic by ID');
+  }
+}
+
+export async function createAdminClinic(data: any, token: string) {
+  
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/admin-clinic`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw await res.json();
+    return res.json();
+  } catch (error: any) {
+    throw new Error(error.message || 'Failed to create clinic');
+  }
+}
+
+
+export async function updateAdminClinic(clinicId: string, data: any, token: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/admin-clinic/${clinicId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw await res.json();
+    return res.json();
+  } catch (error: any) {
+    throw new Error(error.message || 'Failed to update clinic');
+  }
+}
+
+export async function deleteAdminClinic(clinicId: string, token: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/admin-clinic/${clinicId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) throw await res.json();
+    return res.json();
+  } catch (error: any) {
+    throw new Error(error.message || 'Failed to delete clinic');
+  }
+}

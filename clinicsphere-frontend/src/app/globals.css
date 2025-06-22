@@ -5,10 +5,15 @@
   :root {
      --bg-primary: #f8fafc;
   --bg-secondary: rgba(255, 255, 255, 0.1);
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
   --border-color: rgba(255, 255, 255, 0.2);
   --hover-bg: rgba(79, 70, 229, 0.1);
+  --sidebar-bg: #f3f5f9;
+  --sidebar-border: #d0d4db;
+  --text-primary: #1f2a44;
+  --text-secondary: #6b7280;
+  --hover-bg: #e0f2fe; /* sky-blue hover */
+  --hover-text: #0369a1;
+  --icon-bg: #ffffff;
   }
 
   [data-theme="dark"] {

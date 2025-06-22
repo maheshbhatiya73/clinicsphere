@@ -37,30 +37,30 @@ export default function Sidebar({ role }: SidebarProps) {
     visible: {
       x: 0,
       opacity: 1,
-      transition: { type: 'spring', stiffness: 100, damping: 15 },
+      transition: { type: 'spring', stiffness: 120, damping: 20 },
     },
   };
 
   const submenuVariants = {
-    hidden: { height: 0, opacity: 0, transition: { duration: 0.25, ease: 'easeOut' } },
+    hidden: { height: 0, opacity: 0, transition: { duration: 0.2, ease: 'easeOut' } },
     visible: { height: 'auto', opacity: 1, transition: { duration: 0.3, ease: 'easeInOut' } },
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.2 } },
+    hidden: { opacity: 0, y: 15 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
   };
 
   const SidebarContent = ({ isMobile = false }: { isMobile?: boolean }) => (
-    <div className="flex flex-col h-full">
-      <div className="sticky top-0 z-10 pt-6 pb-4 bg-[var(--bg-secondary)] backdrop-blur-lg">
-        <div className="flex items-center space-x-3 px-4">
-          <h2 className="text-xl font-extrabold text-transparent bg-gradient-to-r from-indigo-500 to-teal-500 bg-clip-text">
-            HEALTHCARE
+    <div className="flex flex-col h-full font-inter">
+      <div className="sticky top-0 z-10 pt-6 pb-4 ">
+        <div className="flex items-center space-x-3 px-5">
+          <h2 className="text-2xl font-bold text-transparent bg-gradient-to-r from-sky-500 to-teal-400 bg-clip-text">
+            MediCare
           </h2>
         </div>
       </div>
-      <nav className="flex-1 space-y-2 px-4 overflow-y-auto" aria-label="Main navigation">
+      <nav className="flex-1 space-y-2 px-5 mt-2 overflow-y-auto" aria-label="Main navigation">
         {navItems.map((item) => {
           const isMainActive = item.href && pathname === item.href;
           return (
@@ -72,10 +72,10 @@ export default function Sidebar({ role }: SidebarProps) {
             >
               <Link
                 href={item.href || '#'}
-                className={`flex items-center justify-between p-3 rounded-2xl transition-all duration-300 group
+                className={`flex items-center justify-between p-3 rounded-xl transition-all duration-300 group
                   ${isMainActive
-                    ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300'
-                    : 'hover:bg-[var(--hover-bg)] hover:shadow-md hover:scale-105'}
+                    ? 'bg-sky-100/60 text-sky-600 shadow-md'
+                    : 'hover:bg-sky-50/50 hover:shadow-lg hover:scale-105 hover:border-sky-300/50 '}
                 `}
                 onClick={(e) => {
                   if (item.submenu) {
@@ -89,10 +89,10 @@ export default function Sidebar({ role }: SidebarProps) {
                 aria-expanded={item.submenu ? isMenuOpen(item.name) : undefined}
               >
                 <div className="flex items-center space-x-3">
-                  <span className="p-2 rounded-xl shadow-inner bg-[var(--bg-secondary)] border border-[var(--border-color)] transform group-hover:scale-110 transition-transform">
+                  <span className="p-2 rounded-lg bg-white/70 border border-sky-200/50 shadow-sm transform group-hover:scale-110 group-hover:bg-sky-100/60 transition-all">
                     {item.icon}
                   </span>
-                  <span className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-indigo-500 dark:group-hover:text-indigo-300">
+                  <span className="text-sm font-medium text-gray-800 group-hover:text-sky-500">
                     {item.name}
                   </span>
                 </div>
@@ -100,7 +100,7 @@ export default function Sidebar({ role }: SidebarProps) {
                   <motion.div
                     animate={{ rotate: isMenuOpen(item.name) ? 180 : 0, scale: isMenuOpen(item.name) ? 1.1 : 1 }}
                     transition={{ duration: 0.2 }}
-                    className="text-[var(--text-secondary)] group-hover:text-indigo-400"
+                    className="text-gray-500 group-hover:text-sky-400"
                   >
                     <FaChevronDown className="w-4 h-4" aria-hidden="true" />
                   </motion.div>
@@ -114,7 +114,7 @@ export default function Sidebar({ role }: SidebarProps) {
                       initial="hidden"
                       animate="visible"
                       exit="hidden"
-                      className="ml-8 mt-2 space-y-2"
+                      className="ml-9 mt-2 space-y-1"
                       role="menu"
                     >
                       {item.submenu.map((subItem) => (
@@ -127,8 +127,8 @@ export default function Sidebar({ role }: SidebarProps) {
                             href={subItem.href}
                             className={`flex items-center p-2 rounded-lg text-sm transition-all duration-200
                               ${pathname === subItem.href
-                                ? 'bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-300'
-                                : 'text-[var(--text-secondary)] hover:bg-[var(--hover-bg)] hover:text-teal-500 dark:hover:text-teal-300'}
+                                ? 'bg-sky-100/50 text-sky-600 shadow-sm'
+                                : 'text-gray-600 hover:bg-sky-50/40 hover:text-sky-500 hover:shadow-sm'}
                             `}
                             onClick={() => isMobile && closeSidebar()}
                             aria-label={subItem.name}
@@ -138,7 +138,7 @@ export default function Sidebar({ role }: SidebarProps) {
                             </span>
                             {subItem.name}
                             {pathname === subItem.href && (
-                              <span className="w-2 h-2 ml-auto bg-teal-400 rounded-full animate-pulse" />
+                              <span className="w-2 h-2 ml-auto bg-sky-400 rounded-full animate-pulse" />
                             )}
                           </Link>
                         </motion.li>
@@ -152,17 +152,17 @@ export default function Sidebar({ role }: SidebarProps) {
         })}
       </nav>
 
-      <div className="sticky bottom-0 pt-4 mt-auto border-t border-[var(--border-color)] bg-[var(--bg-secondary)] backdrop-blur-lg">
+      <div className="sticky bottom-0 pt-4 mt-auto border-t border-sky-200/50 bg-gradient-to-t from-white/80 to-sky-50/80 backdrop-blur-md">
         <Link
           href={logoutItem.href}
-          className="flex items-center p-3 space-x-3 rounded-2xl transition-all duration-300 group hover:bg-red-100 dark:hover:bg-red-900/30 hover:scale-105"
+          className="flex items-center p-3 space-x-3 rounded-xl transition-all duration-300 group hover:bg-red-50/50 hover:shadow-lg hover:scale-105 hover:border-red-300/50 hover:border"
           onClick={() => isMobile && closeSidebar()}
           aria-label={logoutItem.name}
         >
-          <span className="p-2 rounded-xl shadow-inner border bg-[var(--bg-secondary)] border-[var(--border-color)] text-red-500 group-hover:scale-110 transition-transform">
+          <span className="p-2 rounded-lg bg-white/70 border border-red-200/50 shadow-sm text-red-500 group-hover:scale-110 group-hover:bg-red-100/60 transition-all">
             {logoutItem.icon}
           </span>
-          <span className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-red-500 dark:group-hover:text-red-300">
+          <span className="text-sm font-medium text-gray-800 group-hover:text-red-500">
             {logoutItem.name}
           </span>
         </Link>
@@ -173,7 +173,7 @@ export default function Sidebar({ role }: SidebarProps) {
   return (
     <>
       <motion.aside
-        className="hidden lg:block w-72 text-[var(--text-primary)] p-4 fixed h-screen shadow-2xl z-50 border-r bg-[var(--bg-secondary)] backdrop-blur-xl border-[var(--border-color)] overflow-hidden"
+        className="hidden lg:block w-72 text-gray-800 p-4 fixed h-screen shadow-xl z-50 border-r bg-gradient-to-b from-white/90 to-sky-50/90 backdrop-blur-2xl border-sky-200/50 overflow-hidden"
         initial={false}
         animate="visible"
         role="navigation"
@@ -187,10 +187,10 @@ export default function Sidebar({ role }: SidebarProps) {
           <>
             <motion.div
               initial={{ opacity: 0 }}
-              animate={{ opacity: 0.6 }}
+              animate={{ opacity: 0.7 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="fixed inset-0 z-40 bg-black lg:hidden"
+              className="fixed inset-0 z-40 bg-black/70 lg:hidden"
               onClick={closeSidebar}
               aria-hidden="true"
             />
@@ -199,7 +199,7 @@ export default function Sidebar({ role }: SidebarProps) {
               initial="hidden"
               animate="visible"
               exit="hidden"
-              className="fixed lg:hidden w-72 text-[var(--text-primary)] p-4 h-screen shadow-2xl z-50 bg-[var(--bg-secondary)] backdrop-blur-xl border-r border-[var(--border-color)] overflow-y-auto"
+              className="fixed lg:hidden w-72 text-gray-800 p-4 h-screen shadow-2xl z-50 bg-gradient-to-b from-white/90 to-sky-50/90 backdrop-blur-2xl border-r border-sky-200/50 overflow-y-auto"
               role="navigation"
               aria-label="Mobile sidebar"
             >

@@ -13,6 +13,7 @@ import { join } from 'path';
 import { SpecialtiesModule } from './specialty/specialties.module';
 import { AdminServiceModule } from './admin/admin-service.module';
 import { DoctorAssignmentModule } from './admin/doctor-assignment.module';
+import { ServiceCategoryModule } from './admin/service-category.module';
 
 @Module({
   imports: [
@@ -34,7 +35,8 @@ import { DoctorAssignmentModule } from './admin/doctor-assignment.module';
     AppointmentsModule,
     SpecialtiesModule,
     DoctorAssignmentModule,
-    AdminServiceModule
+    AdminServiceModule,
+    ServiceCategoryModule
   ],
   controllers: [AppController],
   providers: [AppService],

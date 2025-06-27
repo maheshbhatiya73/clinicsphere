@@ -2,15 +2,23 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FaSearch, FaPlus, FaEdit, FaTrash, FaClock, FaMapMarkerAlt, FaPhone, FaEnvelope } from 'react-icons/fa';
+import { FaSearch, FaPlus} from 'react-icons/fa';
 import CreateModel from './CreateModel';
 import UpdateModel from './UpdateModel';
 import DeleteModel from './DeleteModel';
 import { getAllAdminClinics, createAdminClinic, updateAdminClinic, deleteAdminClinic } from '@/app/lib/api/api';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { DotsHorizontalIcon } from '@radix-ui/react-icons';
+import { SelectContent, SelectItem, SelectTrigger, SelectValue } from '@radix-ui/react-select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 
 interface Clinic {
-  id: string;
+  _id: string;
   name: string;
   contact: { phone: string; email: string };
   address: { line1: string; city: string; state: string; postal_code: string; country: string; location: { lat: number; lng: number } };
@@ -26,35 +34,35 @@ const ClinicPage: React.FC = () => {
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedClinic, setSelectedClinic] = useState<Clinic | null>(null);
-  const [token, setToken] = useState<string>(''); 
+  const [token, setToken] = useState<string>('');
 
-
-useEffect(() => {
-  const storedToken = localStorage.getItem('token');
-  if (storedToken) {
-    setToken(storedToken);
-  }
-}, []);
-const fetchClinics = async () => {
-  if (!token) return
-      try {
-        const data = await getAllAdminClinics(token);
-        setClinics(data);
-      } catch (error) {
-        console.error('Fetch clinics error:', error);
-      }
-    };
 
   useEffect(() => {
-    
+    const storedToken = localStorage.getItem('token');
+    if (storedToken) {
+      setToken(storedToken);
+    }
+  }, []);
+  const fetchClinics = async () => {
+    if (!token) return
+    try {
+      const data = await getAllAdminClinics(token);
+      setClinics(data);
+    } catch (error) {
+      console.error('Fetch clinics error:', error);
+    }
+  };
+
+  useEffect(() => {
+
     fetchClinics();
   }, [token]);
 
-  const handleCreate = async (data: Clinic) => {  
+  const handleCreate = async (data: Clinic) => {
     try {
       const newClinic = await createAdminClinic(data, token);
-      if(newClinic){
-      fetchClinics()
+      if (newClinic) {
+        fetchClinics()
 
       }
     } catch (error) {
@@ -66,7 +74,7 @@ const fetchClinics = async () => {
     if (!selectedClinic) return;
     try {
       const updatedClinic = await updateAdminClinic(selectedClinic._id, data, token);
-      setClinics(clinics.map((clinic) => (clinic.id === selectedClinic._id ? updatedClinic : clinic)));
+      setClinics(clinics.map((clinic) => (clinic._id === selectedClinic._id ? updatedClinic : clinic)));
     } catch (error) {
       console.error('Update clinic error:', error);
     }
@@ -88,119 +96,152 @@ const fetchClinics = async () => {
   );
 
   return (
-    <div className="min-h-screen bg-sky-50 p-6">
+    <div className="min-h-screen ">
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-7xl mx-auto"
+        transition={{ duration: 0.4 }}
+        className="mx-auto space-y-6"
       >
-        <h1 className="text-3xl font-bold text-sky-600 mb-6">Clinic Management</h1>
-
+        <div className="flex items-center justify-between border-b pb-4">
+          <div>
+            <h1 className="text-3xl font-semibold text-sky-800">Clinic Management</h1>
+            <p className="text-gray-500 text-sm mt-1">Manage all your registered clinics easily.</p>
+          </div>
+          <Button
+            onClick={() => setIsCreateOpen(true)}
+            className="bg-sky-600 hover:bg-sky-700 text-white shadow-sm"
+          >
+            <FaPlus className="mr-2 h-4 w-4" /> Add Clinic
+          </Button>
+        </div>
         {/* Search and Filter */}
-        <div className="flex flex-col sm:flex-row justify-between mb-6 space-y-4 sm:space-y-0 sm:space-x-4">
+        <div className=" p-4 rounded-xl flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sky-500" />
-            <input
+            <Input
               type="text"
-              placeholder="Search clinics by name..."
+              placeholder="Search clinics..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 p-2 border border-sky-300 rounded focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="pl-10 focus-visible:ring-sky-500"
             />
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-sky-500" />
           </div>
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="p-2 border border-sky-300 rounded focus:outline-none focus:ring-2 focus:ring-sky-500"
-          >
-            <option value="all">All Cities</option>
-            <option value="delhi">Delhi</option>
-            <option value="mumbai">Mumbai</option>
-            {/* Add more cities as needed */}
-          </select>
-          <button
-            onClick={() => setIsCreateOpen(true)}
-            className="flex items-center space-x-2 bg-sky-500 text-white px-4 py-2 rounded hover:bg-sky-600 transition"
-          >
-            <FaPlus />
-            <span>Add Clinic</span>
-          </button>
+          <Select value={filter} onValueChange={setFilter}>
+            <SelectTrigger className="w-[180px] focus:ring-sky-500">
+              <SelectValue placeholder="Filter by City" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Cities</SelectItem>
+              <SelectItem value="delhi">Delhi</SelectItem>
+              <SelectItem value="mumbai">Mumbai</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        {/* Clinic List */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredClinics.map((clinic) => (
-            <motion.div
-              key={clinic.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-white p-4 rounded-lg shadow-md border border-sky-200"
-            >
-              <h3 className="text-lg font-semibold text-sky-600">{clinic.name}</h3>
-              <div className="text-gray-600 space-y-2">
-                <p className="flex items-center">
-                  <FaMapMarkerAlt className="mr-2 text-sky-500" />
-                  {clinic.address.line1}, {clinic.address.city}, {clinic.address.state}, {clinic.address.postal_code}, {clinic.address.country}
-                </p>
-                <p className="flex items-center">
-                  <FaPhone className="mr-2 text-sky-500" />
-                  {clinic.contact.phone}
-                </p>
-                <p className="flex items-center">
-                  <FaEnvelope className="mr-2 text-sky-500" />
-                  {clinic.contact.email}
-                </p>
-                <p className="flex items-center">
-                  <FaClock className="mr-2 text-sky-500" />
-                  Monday: {clinic.working_hours.monday.open} - {clinic.working_hours.monday.close}
-                </p>
-                <p>
-                  Telemedicine: {clinic.settings.telemedicine_enabled ? 'Enabled' : 'Disabled'}
-                </p>
-                <p>Time Zone: {clinic.settings.time_zone}</p>
-                <p>Currency: {clinic.settings.currency}</p>
-                <p>Language: {clinic.settings.language}</p>
-              </div>
-              <div className="flex justify-end space-x-2 mt-4">
-                <button
-                  onClick={() => {
-                    setSelectedClinic(clinic);
-                    setIsUpdateOpen(true);
-                  }}
-                  className="text-sky-500 hover:text-sky-600"
+        {/* Table */}
+        <div className="bg-white rounded-lg shadow-sm border border-sky-200 overflow-hidden">
+          <Table>
+            <TableHeader className="sticky top-0 z-10 bg-sky-100">
+              <TableRow className="even:bg-sky-50">
+                <TableHead className="text-sky-700">Name</TableHead>
+                <TableHead className="text-sky-700">Address</TableHead>
+                <TableHead className="text-sky-700">Contact</TableHead>
+                <TableHead className="text-sky-700">Hours</TableHead>
+                <TableHead className="text-sky-700">Status</TableHead>
+                <TableHead className="text-sky-700">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredClinics.map((clinic) => (
+                <TableRow
+                  key={clinic._id}
+                  className="hover:bg-sky-50 transition-colors"
                 >
-                  <FaEdit />
-                </button>
-                <button
-                  onClick={() => {
-                    setSelectedClinic(clinic);
-                    setIsDeleteOpen(true);
-                  }}
-                  className="text-red-500 hover:text-red-600"
-                >
-                  <FaTrash />
-                </button>
-              </div>
-            </motion.div>
-          ))}
+                  <TableCell className="font-medium text-sky-600">
+                    {clinic.name}
+                  </TableCell>
+                  <TableCell>
+                    {clinic.address.line1}, {clinic.address.city}
+                  </TableCell>
+                  <TableCell>
+                    <div className="space-y-1">
+                      <p>{clinic.contact.phone}</p>
+                      <p className="text-sm text-gray-500">
+                        {clinic.contact.email}
+                      </p>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {clinic.working_hours.monday.open} -{' '}
+                    {clinic.working_hours.monday.close}
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant="outline"
+                      className={
+                        clinic.settings.telemedicine_enabled
+                          ? 'border-green-600 text-green-600'
+                          : 'border-yellow-500 text-yellow-500'
+                      }
+                    >
+                      {clinic.settings.telemedicine_enabled ? 'Telemedicine' : 'In-Person'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <DotsHorizontalIcon className="h-4 w-4 text-sky-500" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setSelectedClinic(clinic);
+                            setIsUpdateOpen(true);
+                          }}
+                        >
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setSelectedClinic(clinic);
+                            setIsDeleteOpen(true);
+                          }}
+                          className="text-red-600 hover:bg-red-50"
+                        >
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
+
+        {/* Modals */}
+        <CreateModel
+          isOpen={isCreateOpen}
+          onClose={() => setIsCreateOpen(false)}
+          onCreate={handleCreate}
+        />
+        <UpdateModel
+          isOpen={isUpdateOpen}
+          onClose={() => setIsUpdateOpen(false)}
+          onUpdate={handleUpdate}
+          clinicId={selectedClinic?._id || ''}
+          token={token}
+        />
+        <DeleteModel
+          isOpen={isDeleteOpen}
+          onClose={() => setIsDeleteOpen(false)}
+          onDelete={handleDelete}
+          clinicName={selectedClinic?.name || ''}
+        />
       </motion.div>
-
-      {/* Modals */}
-      <CreateModel isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} onCreate={handleCreate} />
-      <UpdateModel
-        isOpen={isUpdateOpen}
-        onClose={() => setIsUpdateOpen(false)}
-        onUpdate={handleUpdate}
-        clinicId={selectedClinic?._id || ''}
-        token={token}
-      />
-      <DeleteModel
-        isOpen={isDeleteOpen}
-        onClose={() => setIsDeleteOpen(false)}
-        onDelete={handleDelete}
-        clinicName={selectedClinic?.name || ''}
-      />
     </div>
   );
 };

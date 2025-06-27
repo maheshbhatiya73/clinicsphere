@@ -26,6 +26,7 @@ export type User = {
   _id: string;
   name: string;
   email: string;
+  profilePicUrl: string;
   role: string;
   activityLog?: { action: string; timestamp: string; _id: string }[];
   createdAt: string;
@@ -189,15 +190,14 @@ export async function fetchUserProfile(token: string) {
   }
 }
 
-export async function createAdminUser(payload: RegisterPayload, token: string) {
+export async function createAdminUser(payload: FormData, token: string) {
   try {
     const res = await fetch(`${API_BASE_URL}/api/admin/users`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(payload),
+      body: payload,
     });
 
     if (!res.ok) {
@@ -211,19 +211,14 @@ export async function createAdminUser(payload: RegisterPayload, token: string) {
 }
 
 // Update a user by ID
-export async function updateAdminUser(
-  userId: string,
-  payload: UpdateUserPayload,
-  token: string
-) {
+export async function updateAdminUser(userId: string, payload: FormData, token: string) {
   try {
     const res = await fetch(`${API_BASE_URL}/api/admin/users/${userId}`, {
       method: 'PUT',
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(payload),
+      body: payload,
     });
 
     if (!res.ok) {
@@ -301,15 +296,14 @@ export async function getAdminUserById(userId: string, token: string) {
   }
 }
 
-export async function createAdminDoctor(payload: DoctorPayload, token: string) {
+export async function createAdminDoctor(payload: FormData, token: string) {
   try {
     const res = await fetch(`${API_BASE_URL}/api/admin/doctors`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(payload),
+      body: payload, // Send FormData directly
     });
 
     if (!res.ok) {
@@ -322,20 +316,18 @@ export async function createAdminDoctor(payload: DoctorPayload, token: string) {
   }
 }
 
-// Update a doctor by ID
 export async function updateAdminDoctor(
   doctorId: string,
-  payload: UpdateDoctorPayload,
+  payload: FormData,
   token: string
 ) {
   try {
     const res = await fetch(`${API_BASE_URL}/api/admin/doctors/${doctorId}`, {
       method: 'PUT',
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(payload),
+      body: payload, // Send FormData directly
     });
 
     if (!res.ok) {
@@ -413,18 +405,14 @@ export async function getAdminDoctorById(doctorId: string, token: string) {
   }
 }
 
-export async function createDoctorPatient(
-  payload: PatientPayload,
-  token: string
-) {
+export async function createDoctorPatient(payload: FormData, token: string) {
   try {
     const res = await fetch(`${API_BASE_URL}/api/doctor/patients`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(payload),
+      body: payload,
     });
 
     if (!res.ok) {
@@ -478,7 +466,7 @@ export async function getDoctorPatientById(
       const errorData = await res.json();
       throw new Error(errorData.message || 'Failed to fetch patient');
     }
-    return res.json(); // Returns { patient: Patient }
+    return res.json();
   } catch (error: any) {
     throw new Error(error.message || 'Network error during fetching patient');
   }
@@ -487,24 +475,23 @@ export async function getDoctorPatientById(
 
 export async function updateDoctorPatient(
   patientId: string,
-  payload: PatientPayload,
+  payload: FormData,
   token: string
 ) {
   try {
     const res = await fetch(`${API_BASE_URL}/api/doctor/patients/${patientId}`, {
       method: 'PUT',
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(payload),
+      body: payload,
     });
 
     if (!res.ok) {
       const errorData = await res.json();
       throw new Error(errorData.message || 'Failed to update patient');
     }
-    return res.json(); // Returns { patient: Patient }
+    return res.json(); 
   } catch (error: any) {
     throw new Error(error.message || 'Network error during patient update');
   }
@@ -817,5 +804,194 @@ export async function createPatientAppointment(
     return data as Appointment;
   } catch (error: any) {
     throw new Error(error.message || 'Network error during creating patient appointment');
+  }
+}
+
+export async function CreateAdminSpecialty(
+  payload: any,
+  token: string
+) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/specialties`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to create specialty');
+    }
+    return res.json();
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during specialty creation');
+  }
+}
+
+export async function getAllAdminSpecialties(
+  token: string,
+  page: number = 1,
+  limit: number = 10
+) {
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/api/admin/specialties?page=${page}&limit=${limit}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to fetch specialties');
+    }
+    const data = await res.json();
+    return data; 
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during fetching specialties');
+  }
+}
+export async function getAdminSpecialtyById(specialtyId: string, token: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/specialties/${specialtyId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to fetch specialty');
+    }
+    return res.json();
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during fetching specialty');
+  }
+}
+export async function updateAdminSpecialty(
+  specialtyId: string,
+  payload: any,
+  token: string
+) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/specialties/${specialtyId}`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to update specialty');
+    }
+    return res.json(); 
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during specialty update');
+  }
+}
+export async function deleteAdminSpecialty(specialtyId: string, token: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/specialties/${specialtyId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to delete specialty');
+    }
+    return res.json(); 
+  } catch (error: any) {
+    throw new Error(error.message || 'Network error during specialty deletion');
+  }
+}
+
+export async function getAllAdminClinics(token: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/admin-clinic`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) throw await res.json();
+    return res.json();
+  } catch (error: any) {
+    throw new Error(error.message || 'Failed to fetch clinics');
+  }
+}
+
+export async function getAdminClinicById(clinicId: string, token: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/admin-clinic/${clinicId}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) throw await res.json();
+    return res.json();
+  } catch (error: any) {
+    throw new Error(error.message || 'Failed to fetch clinic by ID');
+  }
+}
+
+export async function createAdminClinic(data: any, token: string) {
+  
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/admin-clinic`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw await res.json();
+    return res.json();
+  } catch (error: any) {
+    throw new Error(error.message || 'Failed to create clinic');
+  }
+}
+
+
+export async function updateAdminClinic(clinicId: string, data: any, token: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/admin-clinic/${clinicId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw await res.json();
+    return res.json();
+  } catch (error: any) {
+    throw new Error(error.message || 'Failed to update clinic');
+  }
+}
+
+export async function deleteAdminClinic(clinicId: string, token: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/admin-clinic/${clinicId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) throw await res.json();
+    return res.json();
+  } catch (error: any) {
+    throw new Error(error.message || 'Failed to delete clinic');
   }
 }

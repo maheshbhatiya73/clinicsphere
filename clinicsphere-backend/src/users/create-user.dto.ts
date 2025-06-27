@@ -1,8 +1,5 @@
-// create-user.dto.ts
 import { IsString, IsEmail, IsEnum, IsOptional, IsNumber, MinLength, IsMongoId } from 'class-validator';
 import { UserRole } from './user.schema';
-import { Types } from 'mongoose';
-
 
 export class CreateUserDto {
   @IsString()
@@ -17,7 +14,7 @@ export class CreateUserDto {
 
   @IsEnum(UserRole)
   role: UserRole;
-  
+
   @IsOptional()
   @IsString()
   specialization?: string;
@@ -34,10 +31,10 @@ export class CreateUserDto {
   @IsNumber()
   appointmentFee?: number;
 
-  
-   @IsOptional()
+
+  @IsOptional()
   @IsString()
-  doctorId?: string; 
+  doctorId?: string;
 
   @IsOptional()
   @IsNumber()
@@ -45,6 +42,9 @@ export class CreateUserDto {
 
   @IsOptional()
   clinicAddress?: string;
+
+  @IsOptional()
+  profilePicUrl?: string;
 
   @IsOptional()
   phoneNumber?: string;

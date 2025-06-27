@@ -7,22 +7,22 @@ import {
   Param,
   Body,
   Query,
-  ParseIntPipe,
   UseGuards,
-  Req,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
-import { CreateUserDto } from '../users/create-user.dto';
 import { UpdateUserDto } from '../users/update-user.dto';
 import { UserRole } from '../users/user.schema';
 import { JwtAuthGuard } from 'src/auth/wt-auth.guard';
+import { multerConfig } from 'src/config/multer.config';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('admin/doctors')
-@UseGuards(JwtAuthGuard) // protect routes with JWT auth guard
+@UseGuards(JwtAuthGuard) 
 export class AdminDoctorController {
-  constructor(private readonly usersService: UsersService) { }
-
-  // GET /admin/doctors?page=1&limit=10
+  constructor(private readonly usersService: UsersService, private readonly configService: ConfigService) { }
   @Get()
   async getAllDoctors(
     @Query('page') page?: string,
@@ -32,35 +32,60 @@ export class AdminDoctorController {
     const limitNumber = Number(limit) || 10;
     return this.usersService.getAllUsers(pageNumber, limitNumber, UserRole.DOCTOR);
   }
-  // GET /admin/doctors/:id
+  
   @Get(':id')
   async getDoctorById(@Param('id') id: string) {
     return this.usersService.getUserById(id);
   }
-
-  // POST /admin/doctors
+  
   @Post()
-  async createDoctor(@Body() createUserDto: CreateUserDto) {
-    // Ensure role is doctor for created user (override any incoming role)
-    createUserDto.role = UserRole.DOCTOR;
-    return this.usersService.createUser(createUserDto);
+  @UseInterceptors(FileInterceptor('file', multerConfig))
+  async createDoctor(
+    @Body() body: any,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    const appUrl = this.configService.get<string>('APP_URL');
+    const profilePicUrl = file
+      ? `${appUrl}/uploads/profile-pics/${file.filename}`
+      : undefined;
+      
+    const doctorData = {
+      name: body.name,
+      email: body.email,
+      password: body.password,
+      role: UserRole.DOCTOR,
+      profilePicUrl,
+      specialization: body.specialization,
+      licenseNumber: body.licenseNumber,
+      experienceYears: body.experienceYears,
+      appointmentFee: body.appointmentFee,
+      consultationDuration: body.consultationDuration,
+      clinicAddress: body.clinicAddress,
+      bio: body.bio,
+    };
+
+    return this.usersService.createUser(doctorData);
   }
 
-  // PUT /admin/doctors/:id
   @Put(':id')
+  @UseInterceptors(FileInterceptor('file', multerConfig))
   async updateDoctor(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
+    @UploadedFile() file: Express.Multer.File,
   ) {
-    // For admin updating doctor, pass dummy currentUser with role ADMIN
-    const currentUser = { role: UserRole.ADMIN } as any;
-    return this.usersService.updateUser(currentUser, id, updateUserDto);
-  }
+    const currentUser = { role: UserRole.ADMIN, userId: 'admin' } as any;
 
-  // DELETE /admin/doctors/:id
+    const appUrl = this.configService.get<string>('APP_URL');
+    const profilePicUrl = file ? `${appUrl}/uploads/profile-pics/${file.filename}` : undefined;
+
+    return this.usersService.updateUser(currentUser, id, {
+      ...updateUserDto,
+      ...(profilePicUrl && { profilePicUrl }),
+    });
+  } 
   @Delete(':id')
   async deleteDoctor(@Param('id') id: string) {
-    // For admin deleting doctor, pass dummy currentUser with role ADMIN
     const currentUser = { role: UserRole.ADMIN } as any;
     return this.usersService.deleteUser(currentUser, id);
   }

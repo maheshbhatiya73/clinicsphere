@@ -8,9 +8,21 @@ import { UsersModule } from './users/users.module';
 import { AdminModule } from './admin/admin.module';
 import { DoctorModule } from './doctor/doctor.module';
 import { AppointmentsModule } from './appointments/appointments.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { SpecialtiesModule } from './specialty/specialties.module';
+import { AdminServiceModule } from './admin/admin-service.module';
+import { DoctorAssignmentModule } from './admin/doctor-assignment.module';
+import { ServiceCategoryModule } from './admin/service-category.module';
+import { DoctorClinicModule } from './doctor/doctor-clinic.module';
+import { DoctorScheduleModule } from './doctor/doctor-schedule.module';
 
 @Module({
   imports: [
+     ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'), 
+      serveRoot: '/uploads',                      
+    }),
     ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
@@ -22,7 +34,13 @@ import { AppointmentsModule } from './appointments/appointments.module';
     UsersModule,
     AdminModule,
     DoctorModule,
-    AppointmentsModule
+    AppointmentsModule,
+    SpecialtiesModule,
+    DoctorAssignmentModule,
+    AdminServiceModule,
+    ServiceCategoryModule,
+    DoctorClinicModule,
+    DoctorScheduleModule
   ],
   controllers: [AppController],
   providers: [AppService],

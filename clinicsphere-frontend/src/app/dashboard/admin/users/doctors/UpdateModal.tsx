@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaTimes, FaUser, FaEnvelope, FaStethoscope, FaIdCard, FaClock, FaDollarSign, FaMapMarkerAlt, FaInfoCircle } from 'react-icons/fa';
-import { updateAdminDoctor, updateAdminUser, UpdateUserPayload } from '@/app/lib/api/api';
+import { FaTimes, FaUser, FaEnvelope, FaStethoscope, FaIdCard, FaClock, FaDollarSign, FaMapMarkerAlt, FaInfoCircle, FaImage } from 'react-icons/fa';
+import { updateAdminDoctor, UpdateUserPayload } from '@/app/lib/api/api';
 
 interface DoctorUser {
   _id: string;
@@ -17,7 +17,9 @@ interface DoctorUser {
   consultationDuration: number;
   clinicAddress: string;
   bio: string;
+  image?: string; // Add image field for existing doctor image URL
   createdAt: string;
+  profilePicUrl: string;
   updatedAt: string;
 }
 
@@ -35,6 +37,7 @@ interface ExtendedUpdateUserPayload extends UpdateUserPayload {
   consultationDuration: number;
   clinicAddress: string;
   bio: string;
+  image?: File | null; // Add image field for file upload
 }
 
 export default function UpdateModal({ isOpen, onClose, user }: UpdateModalProps) {
@@ -49,8 +52,11 @@ export default function UpdateModal({ isOpen, onClose, user }: UpdateModalProps)
     consultationDuration: 0,
     clinicAddress: '',
     bio: '',
+    image: null,
   });
   const [error, setError] = useState('');
+  const [previewImage, setPreviewImage] = useState<string>('https://via.placeholder.com/150?text=Doctor+Profile'); // Default placeholder
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const specializations = [
     'Cardiology',
@@ -62,6 +68,7 @@ export default function UpdateModal({ isOpen, onClose, user }: UpdateModalProps)
     'Endocrinology',
   ];
 
+  // Populate form and preview image when user data changes
   useEffect(() => {
     if (user) {
       setFormData({
@@ -75,29 +82,60 @@ export default function UpdateModal({ isOpen, onClose, user }: UpdateModalProps)
         consultationDuration: user.consultationDuration || 0,
         clinicAddress: user.clinicAddress || '',
         bio: user.bio || '',
+        image: null,
       });
+      // Set preview image to user's image or default placeholder
+      setPreviewImage(user.profilePicUrl || 'https://via.placeholder.com/150?text=Doctor+Profile');
     }
   }, [user]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const token = localStorage.getItem('token') || '';
-      if (user?._id) {
-        await updateAdminDoctor(user._id, formData, token);
-        onClose();
-      }
-    } catch (err: any) {
-      setError(err.message || 'Failed to update doctor profile');
+  // Handle image selection and preview
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData((prev) => ({ ...prev, image: file }));
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
+
+  // Trigger file input click when preview is clicked
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  try {
+    const token = localStorage.getItem('token') || '';
+    if (user?._id) {
+      const formDataToSend = new FormData();
+      // Append all form fields to FormData
+      Object.entries(formData).forEach(([key, value]) => {
+        if (key === 'image' && value instanceof File) {
+          formDataToSend.append('file', value); // Use 'file' to match backend
+        } else if (value !== null && value !== undefined && key !== 'image') {
+          formDataToSend.append(key, value.toString());
+        }
+      });
+
+      await updateAdminDoctor(user._id, formDataToSend, token);
+      onClose();
+    }
+  } catch (err: any) {
+    setError(err.message || 'Failed to update doctor profile');
+  }
+};
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === 'experienceYears' || name === 'appointmentFee' || name === 'consultationDuration' 
-        ? Number(value) 
+      [name]: name === 'experienceYears' || name === 'appointmentFee' || name === 'consultationDuration'
+        ? Number(value)
         : value,
     }));
   };
@@ -141,6 +179,32 @@ export default function UpdateModal({ isOpen, onClose, user }: UpdateModalProps)
             )}
 
             <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Image Upload Section */}
+              <div className="flex justify-center mb-6">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="relative cursor-pointer"
+                  onClick={handleImageClick}
+                >
+                  <img
+                    src={previewImage}
+                    alt="Doctor Profile Preview"
+                    className="w-32 h-32 rounded-full object-cover border-4 border-indigo-200 shadow-lg"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-full opacity-0 hover:opacity-100 transition-opacity">
+                    <FaImage className="text-white text-2xl" />
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    ref={fileInputRef}
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </motion.div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Personal Information */}
                 <div className="space-y-4">
@@ -175,21 +239,21 @@ export default function UpdateModal({ isOpen, onClose, user }: UpdateModalProps)
                       />
                     </motion.div>
                   </div>
-                   <div className="relative">
-                  <label className="block text-indigo-700 font-medium mb-2 text-sm">Clinic Address</label>
-                  <motion.div whileFocus={{ scale: 1.02 }} className="relative flex items-center">
-                    <FaMapMarkerAlt className="absolute left-3 text-indigo-400" />
-                    <input
-                      type="text"
-                      name="clinicAddress"
-                      value={formData.clinicAddress}
-                      onChange={handleChange}
-                      className="w-full pl-10 pr-4 py-3 bg-indigo-50/50 border border-indigo-200 text-indigo-900 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-300/50 transition-all duration-300 placeholder:text-indigo-400/70"
-                      placeholder="Enter address"
-                      required
-                    />
-                  </motion.div>
-                </div>
+                  <div className="relative">
+                    <label className="block text-indigo-700 font-medium mb-2 text-sm">Clinic Address</label>
+                    <motion.div whileFocus={{ scale: 1.02 }} className="relative flex items-center">
+                      <FaMapMarkerAlt className="absolute left-3 text-indigo-400" />
+                      <input
+                        type="text"
+                        name="clinicAddress"
+                        value={formData.clinicAddress}
+                        onChange={handleChange}
+                        className="w-full pl-10 pr-4 py-3 bg-indigo-50/50 border border-indigo-200 text-indigo-900 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-300/50 transition-all duration-300 placeholder:text-indigo-400/70"
+                        placeholder="Enter address"
+                        required
+                      />
+                    </motion.div>
+                  </div>
                 </div>
 
                 {/* Professional Information */}
@@ -284,7 +348,6 @@ export default function UpdateModal({ isOpen, onClose, user }: UpdateModalProps)
                     />
                   </motion.div>
                 </div>
-               
               </div>
 
               {/* Bio */}

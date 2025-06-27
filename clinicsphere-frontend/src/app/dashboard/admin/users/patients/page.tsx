@@ -103,7 +103,17 @@ export default function UsersPage() {
                   transition={{ type: 'spring', stiffness: 100 }}
                   className="border-b border-sky-200/30 hover:bg-sky-50/50 transition-colors"
                 >
-                  <td className="px-6 py-4 text-sky-900 font-medium">{user.name}</td>
+                   <td className="px-6 py-4 text-sky-900 font-medium">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={user.profilePicUrl}
+                        alt={user.name}
+                        className="w-10 h-10 rounded-full object-cover border border-sky-200"
+                      />
+                      <span>{user.name}</span>
+                    </div>
+                  </td>
+
                   <td className="px-6 py-4 text-sky-900">{user.email}</td>
                   <td className="px-6 py-4 text-sky-900">{user.role}</td>
                   <td className="px-6 py-4 text-sky-900">

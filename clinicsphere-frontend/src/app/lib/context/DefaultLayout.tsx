@@ -20,7 +20,7 @@ interface ProfileTypes {
   name: string;
   email: string;
   role: string;
-  profile_pic?: string; // Optional profile picture field
+  profile_pic?: string;
 }
 
 const LayoutContext = createContext<LayoutContextProps | null>(null);

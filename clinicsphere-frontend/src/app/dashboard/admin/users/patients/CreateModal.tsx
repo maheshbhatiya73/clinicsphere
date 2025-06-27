@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaTimes } from 'react-icons/fa';
+import { FaImage, FaTimes } from 'react-icons/fa';
 import { createAdminUser, RegisterPayload } from '@/app/lib/api/api';
 
 interface CreateModalProps {
@@ -11,20 +11,51 @@ interface CreateModalProps {
 }
 
 export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
-  const [formData, setFormData] = useState<RegisterPayload>({
+  const [formData, setFormData] = useState<any>({
     name: '',
     email: '',
     password: '',
     role: 'patient',
   });
   const [error, setError] = useState('');
+  const [previewImage, setPreviewImage] = useState<string>('/default-profile.png'); 
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token') || '';
-      await createAdminUser(formData, token);
+      
+      const payload = new FormData();
+      payload.append('name', formData.name);
+      payload.append('email', formData.email);
+      payload.append('password', formData.password);
+      payload.append('role', formData.role);
+      if (selectedFile) {
+        payload.append('file', selectedFile);
+      }
+
+      await createAdminUser(payload, token);
       setFormData({ name: '', email: '', password: '', role: 'patient' });
+      setPreviewImage('/default-profile.png');
+      setSelectedFile(null);
       onClose();
     } catch (err: any) {
       setError(err.message || 'Failed to create user');
@@ -68,6 +99,31 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
               </motion.p>
             )}
             <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="flex justify-center mb-6">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="relative cursor-pointer"
+                  onClick={handleImageClick}
+                >
+                  <img
+                    src={previewImage}
+                    alt="Doctor Profile Preview"
+                    className="w-32 h-32 rounded-full object-cover border-4 border-indigo-200 shadow-lg"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-full opacity-0 hover:opacity-100 transition-opacity">
+                    <FaImage className="text-white text-2xl" />
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    ref={fileInputRef}
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </motion.div>
+              </div>
+
               <div>
                 <label className="block text-sky-800 font-medium mb-2 text-sm">Full Name</label>
                 <motion.div
@@ -119,7 +175,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                   <div className="absolute inset-0 rounded-xl pointer-events-none shadow-[0_0_15px_rgba(56,189,248,0.2)]" />
                 </motion.div>
               </div>
-           
+
               <div className="flex justify-end gap-3 pt-2">
                 <motion.button
                   whileHover={{ scale: 1.05, backgroundColor: '#e0f2fe' }}

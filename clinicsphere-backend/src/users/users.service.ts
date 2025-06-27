@@ -30,7 +30,6 @@ export class UsersService {
   }
 
   async getUserById(id: string): Promise<UserDocument> {
-    console.log(`Fetching user by ID: ${id}`);
     return this.findById(id);
   }
 
@@ -45,8 +44,6 @@ export class UsersService {
     if (!user || !password || !user.password) {
       return null;
     }
-    console.log(email, password, user.password);
-
     const isMatch = await bcrypt.compare(password, user.password);
     return isMatch ? user : null;
   }
@@ -80,27 +77,27 @@ export class UsersService {
     return { patients, total, page, limit };
   }
 
-  async createUser(data: CreateUserDto) {
-    console.log('createUser payload:', data);
-
+  async createUser(data: CreateUserDto & { profilePicUrl?: string }) {
     const hashedPassword = await bcrypt.hash(data.password, 12);
+
     const createdUser = new this.userModel({
       ...data,
       doctorId: data.doctorId ? new Types.ObjectId(data.doctorId) : undefined,
       password: hashedPassword,
+      profilePicUrl: data.profilePicUrl,
       activityLog: [{ action: 'User created', timestamp: new Date() }],
     });
+
     const savedUser = await createdUser.save();
-    console.log('Saved user:', savedUser);
     return savedUser;
   }
 
 
-  async updateUser(currentUser: JwtUser, userIdToUpdate: string, updateData: UpdateUserDto) {
+  async updateUser(currentUser: JwtUser, userIdToUpdate: string, updateData: UpdateUserDto & { profilePicUrl?: string }) {
     const user = await this.findById(userIdToUpdate);
     const updateFields = { ...updateData };
 
-    if (updateData && updateData.password) {
+    if (updateData.password) {
       updateFields.password = await bcrypt.hash(updateData.password, 12);
     }
 
@@ -108,9 +105,7 @@ export class UsersService {
       Object.assign(user, updateFields);
       user.activityLog = user.activityLog || [];
       user.activityLog.push({ action: 'Profile updated by admin', timestamp: new Date() });
-      const updatedUser = await user.save();
-      this.logger.log(`Admin updated user: ${userIdToUpdate}`);
-      return updatedUser;
+      return await user.save();
     }
 
     if (currentUser.role === UserRole.DOCTOR) {
@@ -120,9 +115,7 @@ export class UsersService {
       Object.assign(user, updateFields);
       user.activityLog = user.activityLog || [];
       user.activityLog.push({ action: 'Profile updated by doctor', timestamp: new Date() });
-      const updatedUser = await user.save();
-      this.logger.log(`Doctor updated patient: ${userIdToUpdate}`);
-      return updatedUser;
+      return await user.save();
     }
 
     if (currentUser.role === UserRole.PATIENT) {
@@ -135,9 +128,7 @@ export class UsersService {
       Object.assign(user, updateFields);
       user.activityLog = user.activityLog || [];
       user.activityLog.push({ action: 'Profile updated by patient', timestamp: new Date() });
-      const updatedUser = await user.save();
-      this.logger.log(`Patient updated own profile: ${userIdToUpdate}`);
-      return updatedUser;
+      return await user.save();
     }
 
     throw new ForbiddenException('Unauthorized to update user');
@@ -150,14 +141,12 @@ export class UsersService {
     }
 
     if (currentUser.role === UserRole.ADMIN) {
-      // Admin can delete any user
       await this.userModel.deleteOne({ _id: userToDelete._id });
       this.logger.log(`Admin deleted user: ${userIdToDelete}`);
       return { message: 'User deleted successfully' };
     }
 
     if (currentUser.role === UserRole.DOCTOR) {
-      // Doctor can delete only their own patients
       if (userToDelete.role !== UserRole.PATIENT || userToDelete.doctorId?.toString() !== currentUser.userId.toString()) {
         throw new ForbiddenException('Doctors can only delete their own patients');
       }
@@ -166,8 +155,7 @@ export class UsersService {
       this.logger.log(`Doctor deleted patient: ${userIdToDelete}`);
       return { message: 'Patient deleted successfully' };
     }
-
-    // Other roles cannot delete users
+    
     throw new ForbiddenException('Only admins or doctors can delete users');
   }
 
@@ -178,7 +166,7 @@ export class UsersService {
 
     const token = crypto.randomBytes(32).toString('hex');
     user.resetPasswordToken = token;
-    user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour
+    user.resetPasswordExpires = new Date(Date.now() + 3600000); 
     await user.save();
 
     this.logger.log(`Password reset requested for: ${email}`);
